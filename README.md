@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SignalDesk
 
-## Getting Started
+**B2B Account Signal Intelligence** — MESA AI & Applications end-term (Problem 18:
+B2B Account Signal Monitor).
 
-First, run the development server:
+SignalDesk monitors public signals (news / press / RSS) for a salesperson's
+account watchlist, uses **Gemini Flash** to classify each signal, explain why it
+matters, and draft an outreach angle, scores and ranks accounts, and emails a
+**Hot List** every Monday and Thursday morning — the 10 accounts with the
+strongest signals from the last 3 days. It never overwrites the salesperson's own
+CRM notes; it writes only what it discovers.
 
+> One question it answers: **which accounts should I contact right now, what
+> happened, why now, and what should I say?**
+
+## Stack
+Next.js (App Router) · TypeScript · Tailwind · Supabase Postgres · Gemini Flash
+(`gemini-3.8-flash`) · Resend · deployed on Vercel.
+
+## Hard rules
+- Runtime AI is **Gemini Flash only** — no Claude API at runtime.
+- Human-owned CRM fields are **never overwritten** (enforced by architecture).
+- Live external data; public Vercel URL; this GitHub repo; a Components Map.
+
+## Getting started
 ```bash
+cp .env.example .env.local   # fill in real values
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Docs
+Start with [`docs/00-START-HERE.md`](docs/00-START-HERE.md). Engineering guide:
+[`AGENTS.md`](AGENTS.md). Current status: [`docs/CURRENT-STATE.md`](docs/CURRENT-STATE.md).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+_Status: Foundation milestone — see CURRENT-STATE._
