@@ -51,3 +51,45 @@ changes token budgeting; why we validate credentials during discovery (Check 03)
 
 **Next step** — Resolve the Supabase slot, create `signaldesk`, then schema +
 preservation test before any ingestion code.
+
+---
+
+## 2026-10-12 — M2: Database foundation + preservation guarantee
+**Objective** — Stand up the schema with human/system separation and prove,
+with live evidence, that the automated path cannot overwrite Arjun's CRM data.
+
+**Approach** — Paused `aangan-front-desk` (user-approved, reversible) to free a
+Supabase free-tier slot; created project `signaldesk` (ap-south-1). Designed two
+protected human tables + six system tables + shared `accounts`. Enforced the
+preservation guarantee at the **DB privilege layer** via a dedicated
+`signal_writer` role (grants on system tables only; `REVOKE ALL` on human tables;
+`BYPASSRLS` so it needs no per-row policies for system writes). RLS on all tables
+(anon read-only; human writes only by `authenticated`). Rejected relying on the
+service-role key (bypasses everything) or on prompting Gemini.
+
+**Changes** — `supabase/migrations/0001_init.sql`, `0002_harden_function.sql`;
+`supabase/seed/0001_accounts.sql` (10 real Indian companies + CRM);
+`supabase/tests/preservation_proof.sql`.
+
+**Verification (live)** —
+- As `signal_writer`: `UPDATE account_crm` → `ERROR 42501 permission denied`;
+  `INSERT signal_events` → 1 row; human note + last_contact **unchanged**.
+- `preservation_proof.sql` ran without exception (self-asserting → PASSED).
+- Supabase security advisors: **0 issues** after hardening `set_updated_at`
+  (`search_path=''`).
+
+**Trade-offs** — `signal_writer` has no password yet; runtime connection
+(`SIGNAL_WRITER_DATABASE_URL`, pooler) is wired at the ingestion milestone, with
+the role password set by the user in the dashboard (Claude never handles it).
+
+**Technical learning (viva)** — Why privilege separation beats prompt-based
+guarantees; what `BYPASSRLS` does and why it is safe here (no grants on human
+tables); how `SET ROLE` proves the boundary without a login; why RLS + grants are
+complementary (RLS governs the PostgREST anon/authenticated path, grants govern
+the direct `signal_writer` path).
+
+**Documentation updated** — CURRENT-STATE, 03-NINE-CHECKS (08), this journal.
+
+**Next step** — First ingestion vertical slice for ONE account: Google News RSS
+adapter → normalize → dedup (content_hash) → entity match → 3-day filter →
+Gemini classify/extract (validated JSON) → score → write signal rows → render.

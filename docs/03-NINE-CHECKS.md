@@ -46,10 +46,13 @@ source prompting + Zod validation, dedup hashing, idempotent email runs, treatin
 fetched text as untrusted data. **Human stays in the loop on sending outreach** —
 the system drafts, Arjun sends.
 
-### 08 · Judgment protected? — YES (by architecture)
-Human-owned CRM fields live in separate tables, written only by Arjun. The system
-path uses a restricted role + explicit write allowlist + idempotent upserts, and a
-**release-blocking preservation test**. Not reliant on prompting Gemini to behave.
+### 08 · Judgment protected? — YES (by architecture, PROVEN 2026-10-12)
+Human-owned CRM fields live in separate tables (`account_crm`, `contact_history`)
+written only by Arjun. The automated path runs as Postgres role `signal_writer`
+which has **no privileges** on those tables. **Live proof:** as `signal_writer`,
+`UPDATE account_crm` → `permission denied (42501)`; `INSERT signal_events` →
+allowed; Arjun's note + last_contact unchanged. Reproducible via
+`supabase/tests/preservation_proof.sql` (release blocker). Not reliant on prompting.
 
 ### 09 · Owner clear? — YES
 Arjun: watchlist curation, CRM notes, final outreach decision. System: ingestion,
