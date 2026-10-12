@@ -85,6 +85,9 @@ via Resend, human CRM provably untouched. Remaining: optional polish; rotate the
 - `GET /api/cron/hotlist` → email **sent** via Resend; `notification_runs` = sent,
   idempotent (1/day).
 - Human CRM fields unchanged after all writes.
+- **Header account search live** (feature commit `1d9a73f`, shipped by the `f291f8e` deploy, succeeded 14:08Z):
+  typing in the header opens a ranked dropdown — verified on the public URL,
+  "ola" → Ola Electric (outreach, score 35). Selecting a result opens the drawer.
 - Hobby note: single-account ingest ~33s; full 10-account cron may approach the
   60s Hobby cap — batch if it times out (see 13-DEPLOYMENT.md).
 
