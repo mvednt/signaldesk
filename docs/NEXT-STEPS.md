@@ -17,14 +17,18 @@ _Last updated: 2026-10-12_ · Prioritized; top item is the critical path.
   re-running does not duplicate (content_hash); a re-run preservation check shows
   human CRM fields unchanged.
 
-## P1 — Hot List (Mon/Thu)
-Strict 3-day window selection of top ≤10 accounts → Gemini outreach angle →
-Resend email → `notification_runs` (idempotent per run date). Fewer than 10 if
-fewer qualify; never invent signals.
+## ✅ Done (M4 — Hot List)
+Strict 3-day `get_hotlist` RPC, email render + Resend (preview fallback), `/hotlist`
+page, preview + cron routes, `vercel.json` crons, idempotency proven. Verified
+live (1 qualifying account; fewer-than-10 behavior correct).
 
-## P1 — Vercel deploy + cron (verify Hobby limits; GitHub Actions fallback)
+## P0 — Deploy to Vercel (see docs/13-DEPLOYMENT.md)
+Import repo → set env (incl. `SIGNAL_WRITER_DATABASE_URL`, `RESEND_API_KEY`,
+`CRON_SECRET`, `HOTLIST_TO_EMAIL`) → deploy → verify public URL + a real cron hit.
 
-## P2 — Account detail page, signals feed, filters; typed Supabase types
+## P1 — Components Map (exec 6-stage + technical) + diagrams
+## P1 — Enable app write path end-to-end (connection string) + full ingestion run
+## P2 — Account detail page, signals feed, filters; typed Supabase types; viva docs
 
 ## P2 — Dashboard, Hot List selection + Resend email + idempotent run log
 ## P2 — Vercel deploy + cron (verify Hobby limits; GitHub Actions fallback)

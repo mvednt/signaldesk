@@ -66,13 +66,13 @@ export async function insertSignalEvent(
 export async function insertAnalysis(signalEventId: string, a: Analysis, model: string, promptVersion: string): Promise<void> {
   await pool().query(
     `insert into signal_analyses
-       (signal_event_id, category, factual_claim, relevance_explanation, confidence, model, prompt_version)
-     values ($1,$2,$3,$4,$5,$6,$7)
+       (signal_event_id, category, factual_claim, relevance_explanation, confidence, is_relevant, model, prompt_version)
+     values ($1,$2,$3,$4,$5,$6,$7,$8)
      on conflict (signal_event_id) do update set
        category = excluded.category, factual_claim = excluded.factual_claim,
        relevance_explanation = excluded.relevance_explanation, confidence = excluded.confidence,
-       model = excluded.model, prompt_version = excluded.prompt_version`,
-    [signalEventId, a.category, a.factual_claim, a.relevance_explanation, a.confidence, model, promptVersion]
+       is_relevant = excluded.is_relevant, model = excluded.model, prompt_version = excluded.prompt_version`,
+    [signalEventId, a.category, a.factual_claim, a.relevance_explanation, a.confidence, a.is_relevant, model, promptVersion]
   );
   await pool().query(`update signal_events set status = 'analyzed' where id = $1`, [signalEventId]);
 }
@@ -102,6 +102,36 @@ export async function upsertScore(accountId: string, c: ScoreComponents, topSign
        match_component = excluded.match_component, top_signal_event_id = excluded.top_signal_event_id,
        computed_at = now()`,
     [accountId, c.score, c.recency, c.trigger, c.source, c.match, topSignalEventId]
+  );
+}
+
+/** Idempotent claim for a Hot List run. Returns whether THIS call created the
+ *  run row (claimed=true) or it already existed (with its current status). */
+export async function claimNotificationRun(
+  runDate: string,
+  kind = "hotlist"
+): Promise<{ claimed: boolean; existingStatus: string | null }> {
+  const ins = await pool().query(
+    `insert into notification_runs (run_date, kind, status) values ($1,$2,'pending')
+     on conflict (run_date, kind) do nothing returning id`,
+    [runDate, kind]
+  );
+  if (ins.rows[0]) return { claimed: true, existingStatus: null };
+  const ex = await pool().query(`select status from notification_runs where run_date=$1 and kind=$2`, [runDate, kind]);
+  return { claimed: false, existingStatus: ex.rows[0]?.status ?? null };
+}
+
+export async function finalizeNotificationRun(
+  runDate: string,
+  kind: string,
+  status: "sent" | "failed" | "skipped",
+  sentTo: string | null,
+  hotlist: unknown,
+  error: string | null
+): Promise<void> {
+  await pool().query(
+    `update notification_runs set status=$3, sent_to=$4, hotlist=$5, error=$6 where run_date=$1 and kind=$2`,
+    [runDate, kind, status, sentTo, JSON.stringify(hotlist ?? null), error]
   );
 }
 

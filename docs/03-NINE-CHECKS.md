@@ -38,13 +38,15 @@ Resend free tiers. Build cost is engineering time. *Assumption:* volume stays at
 ~40 companies, a few hundred Gemini calls/week.
 
 ## Boundary — any NO means put a human exactly there
-### 07 · Failure risk OK? — only WITH controls
+### 07 · Failure risk OK? — only WITH controls (several now implemented)
 Risks: false positives, wrong-company matching, stale news, fabricated inference,
-duplicate events, email failures, prompt injection from fetched pages. Controls:
-confidence gating + source URLs shown, entity-match thresholds, extract-only-from-
-source prompting + Zod validation, dedup hashing, idempotent email runs, treating
-fetched text as untrusted data. **Human stays in the loop on sending outreach** —
-the system drafts, Arjun sends.
+duplicate events, email failures, prompt injection from fetched pages. Controls
+(implemented): confidence + source URL shown per signal, entity-match threshold
+(0.6), extract-only-from-source prompting + Zod validation, `content_hash` dedup,
+**idempotent Hot List** (`unique(run_date,kind)` — proven: duplicate same-day send
+blocked), recency decay so stale news falls in rank, fetched text treated as
+untrusted data (prompt-injection note in the analyze prompt). **Human stays in the
+loop on sending outreach** — the system drafts, Arjun sends.
 
 ### 08 · Judgment protected? — YES (by architecture, PROVEN 2026-10-12)
 Human-owned CRM fields live in separate tables (`account_crm`, `contact_history`)

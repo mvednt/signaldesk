@@ -3,9 +3,8 @@
 _Last updated: 2026-10-12_
 
 ## Phase
-**Milestone 3 — Ingestion pipeline** (compute complete & verified live; DB
-persistence pending the `signal_writer` connection string). Next: run full
-ingestion + build the Hot List.
+**Milestone 4 — Hot List** (complete; verified live in preview). Next: deploy to
+Vercel with env + cron.
 
 ## Implemented & verified
 - Next.js (App Router) + TypeScript + Tailwind scaffold; `npm install` clean.
@@ -34,6 +33,15 @@ ingestion + build the Hot List.
     and rejects food-safety/gender-bias stories as not workforce-relevant.
 - Dashboard page (`app/page.tsx`) renders from the `account_dashboard` view
   (human vs system context visually separated). `npm run build` passes.
+- **Hot List (M4):** `get_hotlist(p_days)` RPC (strict 3-day window, top ≤10,
+  ranked by score), email render + Resend sender (preview fallback when no key),
+  `/hotlist` page, preview route `/api/hotlist` (+`?format=html`), cron routes
+  `/api/cron/hotlist` & `/api/cron/ingest` (Bearer `CRON_SECRET`), `vercel.json`
+  crons (daily ingest + Mon/Thu Hot List — fits Hobby's 2-cron limit).
+  - Verified live: preview returns **only Ola Electric** (Oct 9, within 3 days);
+    PhonePe/Zepto (Sep) correctly excluded → demonstrates "fewer than 10, never
+    invent". Email HTML renders. **Idempotency proven**: duplicate same-day send
+    blocked by `unique(run_date, kind)`.
 
 ## Blocked
 - _None._
@@ -53,15 +61,17 @@ ingestion + build the Hot List.
   - 7 accounts correctly quiet (no recent trigger). Human CRM fields verified
     unchanged after the writes.
 
-## Pending credential (user action) — enables the app's OWN write path
-- **`SIGNAL_WRITER_DATABASE_URL`** not set → the demo data was written via the
-  admin bridge, but the app's `POST /api/ingest` (pg as `signal_writer`) still
-  needs it. Set `signal_writer`'s password in Supabase and paste the
-  Transaction-pooler string (as `signal_writer`) into `.env.local` + Vercel env.
-  (Claude is blocked by policy from setting a role password itself.)
+## Pending credentials (user action)
+- **`SIGNAL_WRITER_DATABASE_URL`** — enables the app's own write path
+  (`/api/ingest`, cron ingest, and Hot List run recording). Set `signal_writer`'s
+  password in Supabase + paste the Transaction-pooler string. (Claude is blocked
+  by policy from setting a role password itself.)
+- **`RESEND_API_KEY`** + **`HOTLIST_TO_EMAIL`** — to actually send the Hot List
+  (until then it renders in preview mode).
+- **`CRON_SECRET`** — set in `.env.local` and Vercel so cron routes authorize.
 
 ## Not started
-- App-driven full ingestion (needs the connection string above).
+- Vercel deploy (env + cron) and production verification.
 - Gemini classification/extraction/scoring; signal writes.
 - Dashboard, Account detail, Signals feed, Hot List UI.
 - Hot List email (Resend) + idempotent run log.

@@ -139,3 +139,45 @@ but does not write.
 
 **Next step** — Wire the write connection, run a full ingestion, then build the
 Mon/Thu Hot List selection (strict 3-day window) + Resend email + idempotent run.
+
+---
+
+## 2026-10-12 — M3 demo + M4: Hot List
+**Objective** — Populate the dashboard with real data and build the Mon/Thu Hot
+List (strict 3-day window, top ≤10, Gemini outreach, Resend, idempotent).
+
+**Approach** — Policy blocked Claude from setting the `signal_writer` password
+(secret-store write), so the demo data was persisted via the proven
+`SET ROLE signal_writer` admin path (re-proving the boundary during real writes).
+Added `is_relevant` to `signal_analyses` and a `get_hotlist(p_days)` SQL function
+(strict window, ranked by score). Email rendered as inline-styled HTML; Resend
+sender with a preview fallback so the flow runs without a key. Idempotency via
+`unique(run_date, kind)` + a claim/finalize pair in the writer.
+
+**Changes** — migration `0004_hotlist.sql`; `lib/hotlist/select.ts`,
+`lib/notifications/email.ts`, `lib/notifications/hotlist.ts`;
+`lib/db/writer.ts` (+is_relevant, claim/finalize run); routes `/api/hotlist`,
+`/api/cron/hotlist`, `/api/cron/ingest`; `app/hotlist/page.tsx`; `vercel.json`;
+`docs/13-DEPLOYMENT.md`.
+
+**Verification (live)** —
+- Dashboard populated: Ola Electric 33, PhonePe 28, Zepto 11; 7 quiet; human
+  CRM fields unchanged after writes.
+- Hot List preview = **only Ola Electric** (Oct 9 within 3 days); Sep signals
+  excluded → "fewer than 10, never invent". Email HTML renders.
+- Idempotency proof passed: duplicate same-day `notification_runs` insert blocked
+  by the unique constraint; `signal_writer` can write `notification_runs`.
+- `npm run build` passes (6 routes).
+
+**Trade-offs / pending** — Actual email send needs `RESEND_API_KEY` +
+`HOTLIST_TO_EMAIL`; cron run-recording + app-driven ingestion need
+`SIGNAL_WRITER_DATABASE_URL`. Hobby 60s function cap may require batched ingestion.
+
+**Technical learning (viva)** — Two time horizons (configurable warmth decay vs
+strict 3-day Hot List); why idempotency is a DB constraint not app logic; why
+Resend preview-mode keeps the pipeline testable; Hobby cron limits + fallback.
+
+**Documentation updated** — CURRENT-STATE, NEXT-STEPS, 13-DEPLOYMENT, this journal.
+
+**Next step** — Deploy to Vercel (env + cron) and verify on the public URL; then
+the Components Map.
