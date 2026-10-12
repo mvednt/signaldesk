@@ -87,14 +87,20 @@ via Resend, human CRM provably untouched. Remaining: optional polish; rotate the
 - Human CRM fields unchanged after all writes.
 - Hobby note: single-account ingest ~33s; full 10-account cron may approach the
   60s Hobby cap — batch if it times out (see 13-DEPLOYMENT.md).
+
+## Shipped scope (M1-M7, all built)
 - Gemini classification/extraction/scoring; signal writes.
-- Dashboard, Account detail, Signals feed, Hot List UI.
+- Dashboard, Account detail, Signals feed, Hot List UI (incl. header account
+  search with live filtered results).
 - Hot List email (Resend) + idempotent run log.
 - Vercel deploy + cron; Components Map; viva docs.
 
 ## Latest build/deploy status
-- Build: scaffold installs; no app code beyond the starter yet.
-- Deploy: none yet.
+- Build: `npm run build` and `npx tsc --noEmit` clean (re-checked 2026-10-12);
+  8 routes, 3 prerendered.
+- Deploy: live and READY at https://signaldesk-vedanth3.vercel.app (HTTP 200,
+  serving real scored signals). `main` in sync with `origin/main`; pushes to
+  `main` auto-deploy.
 
 ## Key references
 - Repo: https://github.com/mvednt/signaldesk

@@ -3,27 +3,38 @@
 _Last updated: 2026-10-12_
 
 ## Where we are
-Foundation milestone. Scaffold, repo, and validated secrets are in place. The
-only blocker is creating the Supabase `signaldesk` project (free 2-active-project
-limit on the MESA org).
+**Production fully operational.** All seven milestones (M1–M7) are complete and
+verified live. The public URL serves real Supabase data, ingestion writes as the
+restricted `signal_writer` role, the Mon/Thu Hot List email sends via Resend, and
+the human-owned CRM is provably untouched by the automated path.
+
+There is no blocker. What remains is optional polish plus one security chore.
+
+## Verified state (re-checked 2026-10-12)
+- `https://signaldesk-vedanth3.vercel.app` → HTTP 200, rendering real scored
+  signals (Ola Electric, PhonePe, Zepto).
+- `npm run build` and `npx tsc --noEmit` both clean.
+- Local `main` in sync with `origin/main`.
+- Migrations 0001–0004 applied; preservation proof in
+  `supabase/tests/preservation_proof.sql` (release blocker, passing).
+- `vercel.json` crons fit the Hobby 2-cron limit (daily ingest, Mon/Thu Hot List).
 
 ## What changed this session
-- Scaffolded Next.js + TS + Tailwind into the repo root.
-- Created private GitHub repo `mvednt/signaldesk` and set `origin`.
-- Wrote `.env.local` (secrets) and `.env.example` (names only).
-- Validated Gemini (`gemini-3.8-flash`) and NewsAPI.org keys against live APIs.
-- Wrote the docs backbone (00, 01, 03, CURRENT-STATE, HANDOFF, NEXT-STEPS, 16).
-
-## Current blocker
-Supabase project creation returns the free 2-active-project limit. Awaiting a
-user decision (pause an active project / upgrade / reuse). See NEXT-STEPS.
+- M7 dashboard UI integrated: `Shell`, charts, accounts table, account detail
+  drawer, Hot List view.
+- Scoped `a{color:inherit}` to `@layer base` so link colors stop leaking.
+- Live account search in the shell header: filtered dropdown (top 8 by score),
+  empty state, clear button, Escape clears the query.
 
 ## Exact next steps
-1. Resolve the Supabase slot (user decision).
-2. Create project `signaldesk` (region `ap-south-1`), capture URL + keys into
-   `.env.local` and Vercel env.
-3. Design & apply the schema with human/system separation (see NEXT-STEPS) and
-   write the **preservation test** before any ingestion code.
+1. **Rotate the `signal_writer` password** — it is currently a weak demo value.
+   `alter role signal_writer with password '<strong>';` then update
+   `SIGNAL_WRITER_DATABASE_URL` on Vercel and in `.env.local` to match.
+2. Optional: batch the 10-account cron ingest if it approaches the 60s Hobby cap
+   (single-account ingest measured ~33s). See `docs/13-DEPLOYMENT.md`.
+3. Optional polish: typed Supabase types, signals-feed filters.
+4. **After submission:** restore the paused `aangan-front-desk` Supabase project
+   (ref `lyqysxyvxziwfohkimgd`), paused to free a free-tier slot.
 
 ## Assumptions to revisit
 - Timezone Asia/Kolkata for Hot List "mornings".

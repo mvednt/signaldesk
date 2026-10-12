@@ -264,3 +264,40 @@ at presentation size; technical map shows the human/system split and the
 
 **Next step** — Add Vercel secrets for live ingestion/email; optional polish
 (account detail page, viva prep docs).
+
+---
+
+## 2026-10-12 — M7 follow-up: header account search + doc reconciliation
+**Objective** — Finish the one piece of M7 left uncommitted, then make the
+resume docs match reality.
+
+**Approach** — The header search input held query state but showed no results.
+Added a dropdown in `components/Shell.tsx`: top 8 accounts by score matching
+`matchesQuery`, each row showing avatar, name, top signal title (or "No fresh
+qualifying signal"), stage chip and score. Selecting a result opens the account
+drawer and clears the query; a clear button replaces the ⌘K hint while text is
+present; Escape clears the query as well as closing the drawer. No new exports
+needed — `Avatar`, `StageChip` and `matchesQuery` already existed in `ui.tsx`.
+
+**Verification** — `npx tsc --noEmit` clean; `npm run build` passes (8 routes,
+3 prerendered). Prod URL returns HTTP 200 serving real signals.
+
+**Doc reconciliation** — `HANDOFF.md` still described the M1 Supabase-slot
+blocker, seven milestones out of date, and it is read-order #4 for anyone
+resuming. Rewrote "Where we are" / "What changed" / "Exact next steps", dropped
+the stale "Current blocker" section, kept the universal resume prompt verbatim.
+`CURRENT-STATE.md` claimed "no app code beyond the starter yet; Deploy: none
+yet" at the bottom while its own body documented a live deployment — replaced
+with the measured build/deploy status, and relabeled a leftover scope checklist
+that was sitting under "Verified in production".
+
+**Technical learning (viva)** — Stale handoff docs are a real failure mode for
+milestone-based builds: the top of `CURRENT-STATE` was accurate while its
+footer contradicted it, because each milestone appended without re-reading.
+Verifying doc claims against the running system (curl, build, `git status`)
+caught it; reading the docs alone would not have.
+
+**Documentation updated** — HANDOFF, CURRENT-STATE, this journal.
+
+**Next step** — Rotate the `signal_writer` password (weak demo value) and update
+`SIGNAL_WRITER_DATABASE_URL` on Vercel.
