@@ -44,14 +44,24 @@ ingestion + build the Hot List.
 - Created Supabase project **`signaldesk`** (ref `jyoshntmhccxcxbbjqtb`,
   region `ap-south-1`, ACTIVE_HEALTHY).
 
-## Pending credential (user action)
-- **`SIGNAL_WRITER_DATABASE_URL`** not set → the app can compute but not yet
-  persist. Set `signal_writer`'s password in Supabase (Database → Roles) and
-  paste the Transaction-pooler connection string (as `signal_writer`) into
-  `.env.local` + Vercel env. Then `POST /api/ingest` persists for all accounts.
+## Demo state (populated 2026-10-12)
+- Dashboard is **live and populated with real data** (3 warm accounts via the
+  admin `SET ROLE signal_writer` bridge, re-proving the write boundary):
+  - **Ola Electric** 33 — "Onboards First 150 Dealers As Network Expansion" (9 Oct)
+  - **PhonePe** 28 — "Plans 20,000 Frontline Hires…" (25 Sep, 95% conf)
+  - **Zepto** 11 — "Zepto Cafe cuts footprint after expansion" (21 Sep)
+  - 7 accounts correctly quiet (no recent trigger). Human CRM fields verified
+    unchanged after the writes.
+
+## Pending credential (user action) — enables the app's OWN write path
+- **`SIGNAL_WRITER_DATABASE_URL`** not set → the demo data was written via the
+  admin bridge, but the app's `POST /api/ingest` (pg as `signal_writer`) still
+  needs it. Set `signal_writer`'s password in Supabase and paste the
+  Transaction-pooler string (as `signal_writer`) into `.env.local` + Vercel env.
+  (Claude is blocked by policy from setting a role password itself.)
 
 ## Not started
-- Full ingestion run persisting to DB + populated dashboard.
+- App-driven full ingestion (needs the connection string above).
 - Gemini classification/extraction/scoring; signal writes.
 - Dashboard, Account detail, Signals feed, Hot List UI.
 - Hot List email (Resend) + idempotent run log.
