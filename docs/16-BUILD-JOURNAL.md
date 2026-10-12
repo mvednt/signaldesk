@@ -184,6 +184,34 @@ the Components Map.
 
 ---
 
+## 2026-10-12 — M7: Dashboard UI (design integration)
+**Objective** — Replace the minimal dashboard with the production-grade UI.
+
+**Approach** — Integrated a drop-in UI export (`SignalDesk Dashboard UI.zip`) that
+reuses the existing data layer verbatim: `getDashboard()`, `getHotList()`,
+`runDateInTZ()`, and the `DashboardRow`/`HotListItem` types — no new dependencies.
+Added `components/*` (Shell, Dashboard, AccountsTable, HotListView, AccountDrawer,
+Countdown, CopyButton, ui) and an `/accounts` route; overwrote `globals.css`
+(Tailwind v4 theme tokens + Material Symbols), `layout.tsx` (fonts), `page.tsx`,
+and `hotlist/page.tsx`.
+
+**Verification (live, local with real data)** — `npm run build` passes (8 routes).
+Dashboard: KPIs, signal-score bar chart (Ola 35 / PhonePe 28 / Zepto 11, 7 quiet
+hatched), portfolio-warmth gauge, ranked list. Accounts page: filterable table.
+Account drawer: system-derived evidence + **"Why this score"** component breakdown
+(recency/trigger/source/match/confidence + formula), AI outreach with Copy, and a
+separate **"Arjun's own · never overwritten"** human section. Search ⌘K works.
+
+**Technical learning (viva)** — The design slotted in with zero backend changes
+because the data contract (`DashboardRow`) was already shaped around the UI's needs;
+the drawer visually encodes the human/system boundary that the DB enforces.
+
+**Documentation updated** — CURRENT-STATE, this journal.
+
+**Next step** — Push (auto-deploys) and verify the new UI on the public URL.
+
+---
+
 ## 2026-10-12 — M5: Vercel deployment
 **Objective** — Ship a working public URL serving real data.
 

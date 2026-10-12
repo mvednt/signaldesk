@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #eeede8;
+  --foreground: #15171c;
 }
 
 @theme inline {
@@ -10,17 +10,42 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-canvas: #eeede8;
+  --color-paper: #f7f6f2;
+  --color-ink: #15171c;
+  --color-ink-2: #3a3d44;
+  --color-muted: #74777e;
+  --color-faint: #9a9da3;
+  --color-line: #f0eee9;
+  --color-track: #efede7;
+  --color-ember: #e2552b;
+  --color-ember-dark: #c2441e;
+  --color-ember-soft: #fbe7df;
+  --color-ember-ink: #a93a18;
+  --color-human: #8f7bea;
+  --color-human-soft: #eeeafb;
+  --color-human-ink: #4e3ba8;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
+
+a { color: inherit; }
+
+.material-symbols-rounded {
+  font-family: "Material Symbols Rounded";
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes sd-pulse { 0%, 100% { opacity: 1 } 50% { opacity: .35 } }
