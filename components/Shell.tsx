@@ -45,8 +45,12 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
       <div className="grid min-h-screen grid-cols-1 gap-4 p-4 text-ink lg:grid-cols-[248px_minmax(0,1fr)]">
         <aside className="flex flex-col gap-7 rounded-3xl bg-paper px-[18px] pb-[18px] pt-7 lg:sticky lg:top-4 lg:h-[calc(100vh-32px)]">
           <div className="flex items-center gap-2.5 px-2.5">
-            <div className="flex h-[34px] w-[34px] items-center justify-center rounded-full border-[3px] border-ember">
-              <div className="h-3 w-3 rounded-full bg-ink" />
+            <div className="flex h-[34px] w-[34px] items-center justify-center rounded-[11px] bg-ember">
+              <svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true">
+                <circle cx="13" cy="21" r="3" fill="#fff" />
+                <path d="M20 21A7 7 0 0 0 13 14" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
+                <path d="M24 21A11 11 0 0 0 13 10" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
+              </svg>
             </div>
             <div className="text-[21px] font-semibold tracking-[-0.02em]">SignalDesk</div>
           </div>
