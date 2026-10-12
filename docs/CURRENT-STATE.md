@@ -18,9 +18,13 @@ _Last updated: 2026-10-12_
 - Docs backbone (this set) being written.
 
 ## Blocked
-- **Supabase `signaldesk` project not created** — org at free 2-active-project
-  limit. Active: `aangan-front-desk`, `flat-search-section-b`. Needs user
-  decision: pause one (reversible), upgrade org, or reuse an existing project.
+- _None._ (Supabase unblocked — see below.)
+
+## Resolved this session
+- Paused `aangan-front-desk` (ref `lyqysxyvxziwfohkimgd`) to free a free-tier
+  slot. **Reversible — restore it after submission.**
+- Created Supabase project **`signaldesk`** (ref `jyoshntmhccxcxbbjqtb`,
+  region `ap-south-1`, ACTIVE_HEALTHY). URL + publishable key in `.env.local`.
 
 ## Not started
 - DB schema + migrations + seed + preservation test.
@@ -36,4 +40,5 @@ _Last updated: 2026-10-12_
 
 ## Key references
 - Repo: https://github.com/mvednt/signaldesk
+- Supabase: project `signaldesk` / ref `jyoshntmhccxcxbbjqtb` (org MESA)
 - Gemini model: `gemini-3.8-flash` · Timezone: Asia/Kolkata
