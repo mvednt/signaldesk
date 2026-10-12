@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import type { DashboardRow } from "@/lib/data";
 import { useShell } from "./Shell";
 import { StageFilter } from "./Dashboard";
-import { Avatar, ErrorBanner, PageHeader, StageChip, fmtDate, matchesQuery, stagesOf } from "./ui";
+import { Avatar, ErrorBanner, PageHeader, StageChip, fmtDate, glassStyle, matchesQuery, stagesOf } from "./ui";
 
 const COLS = "grid-cols-[minmax(180px,1.2fr)_100px_minmax(220px,2fr)_110px_minmax(160px,1.2fr)_80px]";
 
@@ -38,7 +38,7 @@ export default function AccountsTable({ rows, error }: { rows: DashboardRow[]; e
 
       <ErrorBanner error={error} />
 
-      <div className="overflow-x-auto rounded-[22px] bg-white px-3.5 py-2">
+      <div style={glassStyle} className="glass-card sd-rise overflow-x-auto rounded-[22px] px-3.5 py-2">
         <div className="min-w-[860px]">
           <div className={`grid ${COLS} gap-4 px-2 py-3.5 text-[11px] font-medium tracking-[0.08em] text-[#8a8d93]`}>
             <span>ACCOUNT</span>

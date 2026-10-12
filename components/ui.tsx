@@ -1,5 +1,12 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { DashboardRow } from "@/lib/data";
+
+// Frosted-glass blur. Inlined because the Tailwind v4 turbopack CSS pipeline
+// strips backdrop-filter from authored rules; inline styles bypass it.
+export const glassStyle: CSSProperties = {
+  WebkitBackdropFilter: "blur(22px) saturate(1.55)",
+  backdropFilter: "blur(22px) saturate(1.55)",
+};
 
 export const CATEGORY_LABEL: Record<string, string> = {
   headcount: "Headcount",
@@ -103,7 +110,7 @@ export function ErrorBanner({ error }: { error: string | null }) {
 }
 
 export function Card({ className = "", children }: { className?: string; children: ReactNode }) {
-  return <section className={`flex min-w-0 flex-col rounded-[22px] bg-white p-[22px] ${className}`}>{children}</section>;
+  return <section style={glassStyle} className={`glass-card sd-lift flex min-w-0 flex-col rounded-[22px] p-[22px] ${className}`}>{children}</section>;
 }
 
 export function CardTitle({ children }: { children: ReactNode }) {

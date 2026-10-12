@@ -15,11 +15,11 @@ export default function AccountDrawer({ row: r, onClose }: { row: DashboardRow; 
 
   return (
     <>
-      <div onClick={onClose} className="fixed inset-0 z-40 bg-ink/30" />
+      <div onClick={onClose} className="sd-fade fixed inset-0 z-40 bg-ink/30 backdrop-blur-[3px]" style={{ animation: "sd-fade .25s ease both" }} />
       <aside
         role="dialog"
         aria-label={r.name}
-        className="fixed bottom-3 right-3 top-3 z-41 flex w-[min(480px,calc(100vw-24px))] flex-col overflow-y-auto rounded-3xl bg-white shadow-[0_30px_80px_rgba(21,23,28,.25)]"
+        className="sd-drawer fixed bottom-3 right-3 top-3 z-41 flex w-[min(480px,calc(100vw-24px))] flex-col overflow-y-auto rounded-3xl bg-white/85 shadow-[0_30px_80px_rgba(21,23,28,.25)] backdrop-blur-2xl"
       >
         <div className="flex items-start gap-3.5 border-b border-line px-6 pb-[18px] pt-6">
           <Avatar name={r.name} size={52} />

@@ -4,7 +4,7 @@ import type { DashboardRow } from "@/lib/data";
 import type { HotListItem } from "@/lib/hotlist/select";
 import { useShell } from "./Shell";
 import { OutreachBox } from "./CopyButton";
-import { Card, CategoryChip, ErrorBanner, Icon, PageHeader, StageChip, fmtDate } from "./ui";
+import { Card, CategoryChip, ErrorBanner, Icon, PageHeader, StageChip, fmtDate, glassStyle } from "./ui";
 
 export default function HotListView({ items, rows, runDate, windowDays, error }: {
   items: HotListItem[]; rows: DashboardRow[]; runDate: string; windowDays: number; error: string | null;
@@ -29,7 +29,7 @@ export default function HotListView({ items, rows, runDate, windowDays, error }:
       <ErrorBanner error={error} />
 
       {items.map((it, i) => (
-        <article key={it.signal_event_id} className="flex flex-col gap-3.5 rounded-[22px] bg-white p-6">
+        <article key={it.signal_event_id} style={glassStyle} className="glass-card sd-lift sd-rise flex flex-col gap-3.5 rounded-[22px] p-6">
           <div className="flex flex-wrap items-center gap-3">
             <span className="font-mono text-[13px] text-faint">#{i + 1}</span>
             <span className="text-[22px] font-semibold tracking-[-0.02em]">{it.name}</span>

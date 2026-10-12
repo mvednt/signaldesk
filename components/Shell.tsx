@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { DashboardRow } from "@/lib/data";
-import { Avatar, Icon, StageChip, matchesQuery } from "./ui";
+import { Avatar, Icon, StageChip, glassStyle, matchesQuery } from "./ui";
 import AccountDrawer from "./AccountDrawer";
 
 type ShellCtx = { query: string; setQuery: (q: string) => void; openAccount: (id: string) => void; selectedId: string | null };
@@ -43,9 +43,13 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
   return (
     <Ctx.Provider value={{ query, setQuery, openAccount, selectedId }}>
       <div className="grid min-h-screen grid-cols-1 gap-4 p-4 text-ink lg:grid-cols-[248px_minmax(0,1fr)]">
-        <aside className="flex flex-col gap-7 rounded-3xl bg-paper px-[18px] pb-[18px] pt-7 lg:sticky lg:top-4 lg:h-[calc(100vh-32px)]">
-          <div className="flex items-center gap-2.5 px-2.5">
-            <div className="flex h-[34px] w-[34px] items-center justify-center rounded-[11px] bg-ember">
+        <aside style={glassStyle} className="glass flex flex-col gap-7 rounded-3xl px-[18px] pb-[18px] pt-7 lg:sticky lg:top-4 lg:h-[calc(100vh-32px)]">
+          <Link
+            href="/"
+            aria-label="SignalDesk — back to dashboard"
+            className="sd-press group flex items-center gap-2.5 rounded-2xl px-2.5 py-1.5 no-underline hover:bg-white/50"
+          >
+            <div className="flex h-[34px] w-[34px] items-center justify-center rounded-[11px] bg-ember shadow-[0_8px_22px_-8px_rgba(226,85,43,.8)] transition-transform duration-300 group-hover:scale-110 group-hover:rotate-[-6deg]">
               <svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true">
                 <circle cx="13" cy="21" r="3" fill="#fff" />
                 <path d="M20 21A7 7 0 0 0 13 14" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
@@ -53,7 +57,7 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
               </svg>
             </div>
             <div className="text-[21px] font-semibold tracking-[-0.02em]">SignalDesk</div>
-          </div>
+          </Link>
 
           <nav className="flex flex-col gap-1">
             <div className="px-3 pb-2 text-[11px] font-medium tracking-[0.08em] text-[#8a8d93]">MENU</div>
@@ -63,7 +67,7 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
                 <Link
                   key={n.href}
                   href={n.href}
-                  className={`flex h-11 items-center gap-3 rounded-xl px-3 text-[15px] no-underline transition-colors hover:bg-track ${
+                  className={`sd-press flex h-11 items-center gap-3 rounded-xl px-3 text-[15px] no-underline hover:bg-track ${
                     active ? "bg-white font-semibold text-ink" : "text-[#5e6168]"
                   }`}
                 >
@@ -99,7 +103,7 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
         </aside>
 
         <div className="flex min-w-0 flex-col gap-4">
-          <header className="flex flex-wrap items-center gap-3.5 rounded-3xl bg-paper px-[18px] py-3.5">
+          <header style={glassStyle} className="glass flex flex-wrap items-center gap-3.5 rounded-3xl px-[18px] py-3.5">
             <div className="relative max-w-[440px] flex-[1_1_280px]">
               <label className="flex h-12 w-full items-center gap-2.5 rounded-full bg-white pl-[18px] pr-2">
                 <Icon name="search" size={22} className="text-[#5e6168]" />
@@ -150,7 +154,7 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
             <Link
               href="/hotlist"
               title="Hot List"
-              className="relative flex h-12 w-12 items-center justify-center rounded-full bg-white hover:bg-track"
+              className="sd-press relative flex h-12 w-12 items-center justify-center rounded-full bg-white hover:bg-track"
             >
               <Icon name="notifications" size={22} />
               {hotCount > 0 && <span className="absolute right-[13px] top-3 h-2 w-2 rounded-full border-2 border-white bg-ember" />}
@@ -164,7 +168,7 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
             </div>
           </header>
 
-          <main className="flex min-w-0 flex-col gap-5 rounded-3xl bg-paper p-5 sm:p-7">{children}</main>
+          <main key={pathname} style={glassStyle} className="glass sd-enter flex min-w-0 flex-col gap-5 rounded-3xl p-5 sm:p-7">{children}</main>
         </div>
       </div>
 

@@ -6,7 +6,7 @@ import type { DashboardRow } from "@/lib/data";
 import type { HotListItem } from "@/lib/hotlist/select";
 import { useShell } from "./Shell";
 import Countdown from "./Countdown";
-import { Avatar, CATEGORY_LABEL, Card, CardTitle, ErrorBanner, Icon, PageHeader, StageChip, cap, fmtDate, matchesQuery, stagesOf } from "./ui";
+import { Avatar, CATEGORY_LABEL, Card, CardTitle, ErrorBanner, Icon, PageHeader, StageChip, cap, fmtDate, glassStyle, matchesQuery, stagesOf } from "./ui";
 
 export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; hot: HotListItem[]; error: string | null }) {
   const { query, openAccount, selectedId } = useShell();
@@ -24,18 +24,16 @@ export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; 
   return (
     <>
       <PageHeader title="Dashboard" subtitle="Which accounts should you contact right now, what happened, and what should you say.">
-        <a
-          href="/api/hotlist?format=html"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex h-12 items-center gap-2 rounded-full bg-ink pl-[18px] pr-[22px] text-[15px] font-medium text-white no-underline hover:bg-[#2a2d34]"
+        <Link
+          href="/hotlist/email"
+          className="sd-press flex h-12 items-center gap-2 rounded-full bg-ink pl-[18px] pr-[22px] text-[15px] font-medium text-white no-underline hover:bg-[#2a2d34]"
         >
           <Icon name="mail" />
           Preview email
-        </a>
+        </Link>
         <Link
           href="/hotlist"
-          className="flex h-12 items-center rounded-full border-[1.5px] border-ink px-[22px] text-[15px] font-medium text-ink no-underline hover:bg-white"
+          className="sd-press flex h-12 items-center rounded-full border-[1.5px] border-ink px-[22px] text-[15px] font-medium text-ink no-underline hover:bg-white"
         >
           Open Hot List
         </Link>
@@ -43,7 +41,7 @@ export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; 
 
       <ErrorBanner error={error} />
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(210px,1fr))] gap-4">
+      <div className="sd-stagger grid grid-cols-[repeat(auto-fit,minmax(210px,1fr))] gap-4">
         <Kpi href="/accounts" dark label="Accounts monitored" value={rows.length} foot="Monitoring on for every account" />
         <Kpi href="/accounts?view=warm" label="Warm this cycle" value={warm.length} foot="Score above 0 · 30-day decay" />
         <Kpi href="/hotlist" label="On the Hot List" value={hot.length} foot="Qualifying in the last 3 days" />
@@ -56,7 +54,7 @@ export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; 
         />
       </div>
 
-      <div className="flex flex-wrap gap-4">
+      <div className="sd-stagger flex flex-wrap gap-4">
         <Card className="flex-[2_1_520px] gap-[18px]">
           <div className="flex flex-wrap items-baseline justify-between gap-3">
             <CardTitle>Signal score by account</CardTitle>
@@ -252,8 +250,10 @@ export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; 
 function Kpi({ label, value, foot, dark, footAccent, href, onClick }: {
   label: string; value: number; foot: string; dark?: boolean; footAccent?: boolean; href?: string; onClick?: () => void;
 }) {
-  const cls = `flex min-h-[176px] flex-col justify-between rounded-[22px] p-[22px] text-left no-underline transition-shadow ${
-    dark ? "bg-[radial-gradient(120%_90%_at_100%_0%,#5a2414_0%,#15171c_60%)] text-white" : "bg-white text-ink hover:shadow-[inset_0_0_0_1.5px_#15171c]"
+  const cls = `sd-press sd-lift flex min-h-[176px] flex-col justify-between rounded-[22px] p-[22px] text-left no-underline ${
+    dark
+      ? "bg-[radial-gradient(120%_90%_at_100%_0%,#5a2414_0%,#15171c_60%)] text-white shadow-[0_22px_50px_-28px_rgba(21,23,28,.6)]"
+      : "glass-card text-ink hover:shadow-[inset_0_0_0_1.5px_#15171c,0_30px_66px_-32px_rgba(21,23,28,.4)]"
   }`;
   const body = (
     <>
@@ -267,8 +267,9 @@ function Kpi({ label, value, foot, dark, footAccent, href, onClick }: {
       <div className={`text-[13px] ${dark ? "text-[#f2a385]" : footAccent ? "font-medium text-ember-dark" : "text-muted"}`}>{foot}</div>
     </>
   );
-  if (href) return <Link href={href} className={cls}>{body}</Link>;
-  return <button onClick={onClick} className={`${cls} cursor-pointer border-0`}>{body}</button>;
+  const style = dark ? undefined : glassStyle;
+  if (href) return <Link href={href} style={style} className={cls}>{body}</Link>;
+  return <button onClick={onClick} style={style} className={`${cls} cursor-pointer border-0`}>{body}</button>;
 }
 
 export function StageFilter({ stages, value, onChange }: { stages: string[]; value: string; onChange: (s: string) => void }) {
