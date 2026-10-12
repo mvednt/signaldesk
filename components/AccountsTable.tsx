@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import type { DashboardRow } from "@/lib/data";
 import { useShell } from "./Shell";
 import { StageFilter } from "./Dashboard";
@@ -11,12 +12,28 @@ const COLS = "grid-cols-[minmax(180px,1.2fr)_100px_minmax(220px,2fr)_110px_minma
 export default function AccountsTable({ rows, error }: { rows: DashboardRow[]; error: string | null }) {
   const { query, openAccount, selectedId } = useShell();
   const [stage, setStage] = useState("all");
-  const filtered = rows.filter((r) => (stage === "all" || r.relationship_stage === stage) && matchesQuery(r, query));
+  const [warmOnly, setWarmOnly] = useState(useSearchParams().get("view") === "warm");
+  const filtered = rows.filter(
+    (r) => (stage === "all" || r.relationship_stage === stage) && (!warmOnly || r.score > 0) && matchesQuery(r, query),
+  );
 
   return (
     <>
-      <PageHeader title="Accounts" subtitle="Human priority wins, then system score.">
-        <StageFilter stages={stagesOf(rows)} value={stage} onChange={setStage} />
+      <PageHeader
+        title="Accounts"
+        subtitle={warmOnly ? "Warm this cycle — scored above 0." : "Human priority wins, then system score."}
+      >
+        <div className="flex flex-wrap items-center gap-1.5">
+          <button
+            onClick={() => setWarmOnly((v) => !v)}
+            className={`h-8 cursor-pointer rounded-full border-[1.5px] px-[13px] text-[13px] font-medium ${
+              warmOnly ? "border-ember bg-ember text-white" : "border-[#e3e0d9] bg-transparent text-ink-2 hover:border-ink"
+            }`}
+          >
+            Warm only
+          </button>
+          <StageFilter stages={stagesOf(rows)} value={stage} onChange={setStage} />
+        </div>
       </PageHeader>
 
       <ErrorBanner error={error} />

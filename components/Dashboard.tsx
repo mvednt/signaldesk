@@ -45,7 +45,7 @@ export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; 
 
       <div className="grid grid-cols-[repeat(auto-fit,minmax(210px,1fr))] gap-4">
         <Kpi href="/accounts" dark label="Accounts monitored" value={rows.length} foot="Monitoring on for every account" />
-        <Kpi href="/accounts" label="Warm this cycle" value={warm.length} foot="Score above 0 · 30-day decay" />
+        <Kpi href="/accounts?view=warm" label="Warm this cycle" value={warm.length} foot="Score above 0 · 30-day decay" />
         <Kpi href="/hotlist" label="On the Hot List" value={hot.length} foot="Qualifying in the last 3 days" />
         <Kpi
           onClick={top ? () => openAccount(top.account_id) : undefined}
