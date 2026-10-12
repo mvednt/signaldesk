@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { DashboardRow } from "@/lib/data";
-import { Icon } from "./ui";
+import { Avatar, Icon, StageChip, matchesQuery } from "./ui";
 import AccountDrawer from "./AccountDrawer";
 
 type ShellCtx = { query: string; setQuery: (q: string) => void; openAccount: (id: string) => void; selectedId: string | null };
@@ -25,7 +25,7 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
         e.preventDefault();
         searchRef.current?.focus();
       }
-      if (e.key === "Escape") setSelectedId(null);
+      if (e.key === "Escape") { setSelectedId(null); setQuery(""); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -37,6 +37,8 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
     { href: "/accounts", label: "Accounts", icon: "apartment", badge: String(rows.length) },
   ];
   const selected = rows.find((r) => r.account_id === selectedId) ?? null;
+  const q = query.trim();
+  const results = q ? rows.filter((r) => matchesQuery(r, query)).sort((a, b) => b.score - a.score).slice(0, 8) : [];
 
   return (
     <Ctx.Provider value={{ query, setQuery, openAccount, selectedId }}>
@@ -94,17 +96,52 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
 
         <div className="flex min-w-0 flex-col gap-4">
           <header className="flex flex-wrap items-center gap-3.5 rounded-3xl bg-paper px-[18px] py-3.5">
-            <label className="flex h-12 max-w-[440px] flex-[1_1_280px] items-center gap-2.5 rounded-full bg-white pl-[18px] pr-2">
-              <Icon name="search" size={22} className="text-[#5e6168]" />
-              <input
-                ref={searchRef}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search accounts, signals"
-                className="min-w-0 flex-1 border-0 bg-transparent text-[14.5px] text-ink outline-none placeholder:text-faint"
-              />
-              <kbd className="flex h-7 items-center rounded-lg bg-track px-2.5 font-mono text-xs text-[#5e6168]">⌘K</kbd>
-            </label>
+            <div className="relative max-w-[440px] flex-[1_1_280px]">
+              <label className="flex h-12 w-full items-center gap-2.5 rounded-full bg-white pl-[18px] pr-2">
+                <Icon name="search" size={22} className="text-[#5e6168]" />
+                <input
+                  ref={searchRef}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search accounts, signals"
+                  className="min-w-0 flex-1 border-0 bg-transparent text-[14.5px] text-ink outline-none placeholder:text-faint"
+                />
+                {query ? (
+                  <button
+                    onClick={() => { setQuery(""); searchRef.current?.focus(); }}
+                    aria-label="Clear search"
+                    className="flex h-7 w-7 items-center justify-center rounded-full text-[#5e6168] hover:bg-track"
+                  >
+                    <Icon name="close" size={18} />
+                  </button>
+                ) : (
+                  <kbd className="flex h-7 items-center rounded-lg bg-track px-2.5 font-mono text-xs text-[#5e6168]">⌘K</kbd>
+                )}
+              </label>
+              {q && (
+                <div className="absolute inset-x-0 top-[54px] z-30 flex flex-col gap-0.5 rounded-2xl bg-white p-2 shadow-[0_24px_70px_rgba(21,23,28,.20)]">
+                  {results.length === 0 ? (
+                    <div className="px-3 py-3 text-sm text-muted">No accounts match “{query}”.</div>
+                  ) : (
+                    results.map((r) => (
+                      <button
+                        key={r.account_id}
+                        onClick={() => { openAccount(r.account_id); setQuery(""); }}
+                        className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-left hover:bg-paper"
+                      >
+                        <Avatar name={r.name} size={32} />
+                        <span className="flex min-w-0 flex-1 flex-col">
+                          <span className="truncate text-[14px] font-medium">{r.name}</span>
+                          <span className="truncate text-[12px] text-muted">{r.top_title ?? "No fresh qualifying signal"}</span>
+                        </span>
+                        <StageChip stage={r.relationship_stage} />
+                        <span className="font-mono text-[13px] text-muted">{r.score.toFixed(0)}</span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
             <div className="flex-1" />
             <Link
               href="/hotlist"
