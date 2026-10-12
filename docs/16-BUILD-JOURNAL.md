@@ -93,3 +93,49 @@ the direct `signal_writer` path).
 **Next step** — First ingestion vertical slice for ONE account: Google News RSS
 adapter → normalize → dedup (content_hash) → entity match → 3-day filter →
 Gemini classify/extract (validated JSON) → score → write signal rows → render.
+
+---
+
+## 2026-10-12 — M3: Ingestion pipeline (compute verified live)
+**Objective** — Build the end-to-end pipeline that turns live news into scored,
+explained, source-linked signals with outreach angles.
+
+**Approach** — Separated pure compute (`computeAccountSignals`) from persistence
+(`persistAccountResults`) so compute is testable without DB creds. Sources:
+Google News RSS (primary) + NewsAPI (enrichment, fails soft). Normalize →
+content_hash dedup → entity match (name/alias, threshold 0.6) → analyze most
+recent N (bounded Gemini cost) → deterministic score. A dry-run mode on
+`/api/ingest` returns compute results as JSON for verification pre-persistence.
+
+**Key decisions / findings (live)** —
+- Gemini `gemini-3.8-flash` is a *thinking* model; `thinkingConfig.thinkingBudget=0`
+  + `responseSchema` gives clean structured JSON (validated: HTTP 200, non-empty).
+- RSS links are Google News redirects; publisher parsed from the "… - Publisher"
+  title suffix. LinkedIn deliberately excluded (not compliantly accessible).
+- Freshest news for the seeded companies is ~3 weeks old here, so a 14-day decay
+  scored everything 0. Introduced **two time horizons**: a configurable warmth
+  decay (`SIGNAL_DECAY_DAYS`, default 30) for the dashboard score, and a strict
+  3-day window for the Hot List. Scores are shown honestly (an old operational
+  signal scores low — the decay working as intended).
+- Verified discrimination: Gemini marked "Zepto Cafe cuts footprint after
+  expansion" relevant (operational + outreach angle) and rejected food-safety and
+  gender-bias stories — intelligence, not a news feed.
+
+**Changes** — `lib/types.ts`, `lib/env.ts`, `lib/supabase/read.ts`,
+`lib/db/writer.ts` (allowlisted writes as `signal_writer`), `lib/ingestion/*`
+(sources, normalize, match), `lib/ai/*` (gemini, analyze), `lib/scoring/score.ts`,
+`lib/pipeline.ts`, `lib/data.ts`, `app/api/ingest/route.ts`, `app/page.tsx`,
+migration `0003_dashboard_view.sql`, next.config cleanup (removed experimental
+cacheComponents so `dynamic` works).
+
+**Verification** — `/api/ingest?account=Zepto` returned real analyzed signals;
+`npm run build` passes (TypeScript clean; `/` + `/api/ingest` dynamic).
+
+**Trade-offs / pending** — Persistence needs `SIGNAL_WRITER_DATABASE_URL`
+(user sets `signal_writer` password + pooler string). Until then the app computes
+but does not write.
+
+**Documentation updated** — CURRENT-STATE, NEXT-STEPS, this journal.
+
+**Next step** — Wire the write connection, run a full ingestion, then build the
+Mon/Thu Hot List selection (strict 3-day window) + Resend email + idempotent run.

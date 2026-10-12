@@ -3,7 +3,9 @@
 _Last updated: 2026-10-12_
 
 ## Phase
-**Milestone 2 — Database foundation** (complete). Next: first ingestion slice.
+**Milestone 3 — Ingestion pipeline** (compute complete & verified live; DB
+persistence pending the `signal_writer` connection string). Next: run full
+ingestion + build the Hot List.
 
 ## Implemented & verified
 - Next.js (App Router) + TypeScript + Tailwind scaffold; `npm install` clean.
@@ -23,6 +25,15 @@ _Last updated: 2026-10-12_
 - **10 real companies seeded** with Arjun's CRM rows (Delhivery, Urban Company,
   Zepto, Lenskart, Rapido, BigBasket, Meesho, Ola Electric, PhonePe, Nykaa).
 - Supabase **security advisors: 0 issues**.
+- **Ingestion pipeline (M3) built & verified live via `/api/ingest?account=…` dry
+  run:** Google News RSS + NewsAPI adapters, normalize + dedup (content_hash),
+  entity matching, Gemini Flash classify/relevance/outreach (validated JSON,
+  `thinkingBudget:0`), deterministic scoring with configurable recency decay.
+  - Zepto dry run: 114 raw → 113 normalized → 99 matched; Gemini correctly flags
+    "Zepto Cafe cuts footprint after expansion" as a relevant operational trigger
+    and rejects food-safety/gender-bias stories as not workforce-relevant.
+- Dashboard page (`app/page.tsx`) renders from the `account_dashboard` view
+  (human vs system context visually separated). `npm run build` passes.
 
 ## Blocked
 - _None._
@@ -33,10 +44,14 @@ _Last updated: 2026-10-12_
 - Created Supabase project **`signaldesk`** (ref `jyoshntmhccxcxbbjqtb`,
   region `ap-south-1`, ACTIVE_HEALTHY).
 
+## Pending credential (user action)
+- **`SIGNAL_WRITER_DATABASE_URL`** not set → the app can compute but not yet
+  persist. Set `signal_writer`'s password in Supabase (Database → Roles) and
+  paste the Transaction-pooler connection string (as `signal_writer`) into
+  `.env.local` + Vercel env. Then `POST /api/ingest` persists for all accounts.
+
 ## Not started
-- Supabase client wiring in the app (`lib/supabase/`); runtime write path as
-  `signal_writer` (needs role password set in dashboard → `SIGNAL_WRITER_DATABASE_URL`).
-- Source adapters (RSS + NewsAPI), normalization, dedup, entity matching.
+- Full ingestion run persisting to DB + populated dashboard.
 - Gemini classification/extraction/scoring; signal writes.
 - Dashboard, Account detail, Signals feed, Hot List UI.
 - Hot List email (Resend) + idempotent run log.

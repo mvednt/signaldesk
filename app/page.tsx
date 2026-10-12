@@ -1,69 +1,139 @@
-import Image from "next/image";
+import { getDashboard, type DashboardRow } from "@/lib/data";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+const CATEGORY_LABEL: Record<string, string> = {
+  headcount: "Headcount",
+  leadership: "Leadership",
+  funding: "Funding",
+  digitalisation: "Digitalisation",
+  operational: "Operational",
+  other: "Other",
+};
+
+function fmtDate(iso: string | null): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function scoreTone(score: number): string {
+  if (score >= 50) return "bg-emerald-500";
+  if (score >= 20) return "bg-amber-500";
+  if (score > 0) return "bg-slate-400";
+  return "bg-slate-200 dark:bg-slate-700";
+}
+
+export default async function Home() {
+  let rows: DashboardRow[] = [];
+  let error: string | null = null;
+  try {
+    rows = await getDashboard();
+  } catch (e) {
+    error = e instanceof Error ? e.message : String(e);
+  }
+
+  const warm = rows.filter((r) => r.score > 0).length;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="mx-auto max-w-5xl px-4 py-10">
+      <header className="mb-8">
+        <h1 className="text-2xl font-semibold tracking-tight">SignalDesk</h1>
+        <p className="mt-1 text-sm text-slate-500">
+          B2B account signal intelligence · {rows.length} accounts monitored · {warm} warm this cycle
+        </p>
+        <p className="mt-3 text-xs text-slate-400">
+          <span className="inline-block h-2 w-2 rounded-full bg-sky-500 align-middle" /> system-derived &nbsp;·&nbsp;
+          <span className="inline-block h-2 w-2 rounded-full bg-violet-500 align-middle" /> Arjun&apos;s own (never overwritten)
+        </p>
+      </header>
+
+      {error && (
+        <div className="rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-700">
+          Could not load dashboard: {error}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      )}
+
+      <div className="space-y-4">
+        {rows.map((r, i) => (
+          <article
+            key={r.account_id}
+            className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-slate-400">#{i + 1}</span>
+                  <h2 className="text-lg font-semibold">{r.name}</h2>
+                  {r.relationship_stage && (
+                    <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-700 dark:bg-violet-950 dark:text-violet-300">
+                      {r.relationship_stage}
+                    </span>
+                  )}
+                  {r.priority_override != null && (
+                    <span className="rounded-full bg-violet-600 px-2 py-0.5 text-xs font-medium text-white">
+                      pinned P{r.priority_override}
+                    </span>
+                  )}
+                </div>
+                <p className="mt-0.5 text-xs text-slate-500">
+                  {r.industry}
+                  {r.hq_city ? ` · ${r.hq_city}` : ""}
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-semibold tabular-nums">{r.score.toFixed(0)}</div>
+                <div className="mt-1 h-1.5 w-24 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                  <div className={`h-full ${scoreTone(r.score)}`} style={{ width: `${Math.min(100, r.score)}%` }} />
+                </div>
+                <div className="mt-1 text-[10px] uppercase tracking-wide text-slate-400">signal score</div>
+              </div>
+            </div>
+
+            {/* System-derived signal */}
+            {r.top_title ? (
+              <div className="mt-4 rounded-lg border-l-2 border-sky-500 bg-sky-50/50 p-3 dark:bg-sky-950/20">
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  {r.top_category && (
+                    <span className="rounded bg-sky-100 px-1.5 py-0.5 font-medium text-sky-700 dark:bg-sky-900 dark:text-sky-300">
+                      {CATEGORY_LABEL[r.top_category] ?? r.top_category}
+                    </span>
+                  )}
+                  <span className="text-slate-400">{fmtDate(r.top_published_at)}</span>
+                  {r.top_confidence != null && (
+                    <span className="text-slate-400">· {(r.top_confidence * 100).toFixed(0)}% confidence</span>
+                  )}
+                  <span className="text-slate-400">· {r.top_source}</span>
+                </div>
+                <a
+                  href={r.top_url ?? "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 block text-sm font-medium text-slate-900 hover:underline dark:text-slate-100"
+                >
+                  {r.top_title}
+                </a>
+                {r.top_relevance && <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{r.top_relevance}</p>}
+                {r.top_outreach_angle && (
+                  <p className="mt-2 rounded bg-white p-2 text-sm italic text-slate-700 ring-1 ring-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700">
+                    ✍️ {r.top_outreach_angle}
+                    <span className="ml-1 not-italic text-[10px] uppercase tracking-wide text-slate-400">AI-drafted</span>
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p className="mt-4 text-sm text-slate-400">No fresh qualifying signals this cycle.</p>
+            )}
+
+            {/* Human-owned context */}
+            <div className="mt-3 border-t border-dashed border-slate-200 pt-3 text-xs text-slate-500 dark:border-slate-800">
+              <span className="font-medium text-violet-600 dark:text-violet-400">Arjun&apos;s notes:</span>{" "}
+              {r.relationship_notes ?? "—"}
+              <span className="ml-2 text-slate-400">· last contact {fmtDate(r.last_contact_at)}</span>
+            </div>
+          </article>
+        ))}
+      </div>
+    </main>
   );
 }

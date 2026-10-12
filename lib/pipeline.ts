@@ -1,0 +1,103 @@
+// Ingestion orchestrator. `computeAccountSignals` is pure (no DB) so it can be
+// tested in isolation; `persistAccountResults` does the system-owned writes.
+import type { Account, NormalizedSignal } from "@/lib/types";
+import { fetchAllSources } from "@/lib/ingestion/sources";
+import { normalizeAll } from "@/lib/ingestion/normalize";
+import { matchAccount, MATCH_THRESHOLD } from "@/lib/ingestion/match";
+import { analyzeSignal, PROMPT_VERSION } from "@/lib/ai/analyze";
+import { GEMINI_MODEL } from "@/lib/ai/gemini";
+import { scoreSignal, scoreAccount, type ScoredSignal } from "@/lib/scoring/score";
+import {
+  insertSignalEvent, insertAnalysis, insertOutreach, upsertScore,
+  startIngestionRun, finishIngestionRun,
+} from "@/lib/db/writer";
+
+export interface ComputeResult {
+  account: Account;
+  rawCount: number;
+  normalizedCount: number;
+  matchedCount: number;
+  analyzed: ScoredSignal[];
+  topContentHash: string | null;
+}
+
+const MAX_ANALYZE = 6; // bound Gemini calls per account per run
+
+export async function computeAccountSignals(account: Account): Promise<ComputeResult> {
+  const raws = await fetchAllSources(account);
+  const normalized = normalizeAll(raws);
+
+  const matched = normalized
+    .map((s) => ({ s, m: matchAccount(account, s) }))
+    .filter(({ m }) => m.confidence >= MATCH_THRESHOLD);
+
+  // Analyze the most-recent matched items (no hard age cutoff — the scoring's
+  // recency decay handles age so quiet/old accounts fall in rank naturally).
+  const recent = matched
+    .sort((a, b) => Date.parse(b.s.publishedAt ?? "0") - Date.parse(a.s.publishedAt ?? "0"))
+    .slice(0, MAX_ANALYZE);
+
+  const analyzed: ScoredSignal[] = [];
+  for (const { s, m } of recent) {
+    const analysis = await analyzeSignal(account, s);
+    const components = scoreSignal(s, analysis, m.confidence);
+    analyzed.push({ signal: s, analysis, matchConfidence: m.confidence, components });
+  }
+
+  const top = scoreAccount(analyzed);
+  return {
+    account,
+    rawCount: raws.length,
+    normalizedCount: normalized.length,
+    matchedCount: matched.length,
+    analyzed,
+    topContentHash: top?.topContentHash ?? null,
+  };
+}
+
+export async function persistAccountResults(r: ComputeResult): Promise<{ newEvents: number }> {
+  const model = GEMINI_MODEL();
+  const hashToEventId = new Map<string, string>();
+  let newEvents = 0;
+
+  for (const sc of r.analyzed) {
+    const { id, inserted } = await insertSignalEvent(r.account.id, sc.signal);
+    hashToEventId.set(sc.signal.contentHash, id);
+    if (inserted) newEvents++;
+    await insertAnalysis(id, sc.analysis, model, PROMPT_VERSION);
+    if (sc.analysis.is_relevant && sc.analysis.outreach_angle.trim()) {
+      await insertOutreach(r.account.id, id, sc.analysis.outreach_angle, model, PROMPT_VERSION);
+    }
+  }
+
+  const top = scoreAccount(r.analyzed);
+  const topEventId = top?.topContentHash ? hashToEventId.get(top.topContentHash) ?? null : null;
+  await upsertScore(
+    r.account.id,
+    top ?? { score: 0, recency: 0, trigger: 0, source: 0, match: 0, topContentHash: null },
+    topEventId
+  );
+  return { newEvents };
+}
+
+export async function runIngestion(accounts: Account[], trigger: "manual" | "cron") {
+  const runId = await startIngestionRun(trigger);
+  const errors: Array<{ account: string; error: string }> = [];
+  let signalsFound = 0, signalsNew = 0, scanned = 0;
+
+  for (const account of accounts) {
+    scanned++;
+    try {
+      const computed = await computeAccountSignals(account);
+      signalsFound += computed.normalizedCount;
+      const { newEvents } = await persistAccountResults(computed);
+      signalsNew += newEvents;
+    } catch (e) {
+      errors.push({ account: account.name, error: e instanceof Error ? e.message : String(e) });
+    }
+  }
+
+  const status = errors.length === 0 ? "success" : errors.length < accounts.length ? "partial" : "failed";
+  await finishIngestionRun(runId, status, { accounts_scanned: scanned, signals_found: signalsFound, signals_new: signalsNew }, errors);
+  return { runId, status, scanned, signalsFound, signalsNew, errors };
+}

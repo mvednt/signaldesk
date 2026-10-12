@@ -1,9 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  // Conventional dynamic rendering: dashboard + API always read fresh from
+  // Supabase. (Scaffold's experimental cacheComponents/partialPrefetching removed
+  // for predictable behavior and compatibility with `export const dynamic`.)
   turbopack: {
     rules: {
       "*.css": {
