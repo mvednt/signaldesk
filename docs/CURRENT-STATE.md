@@ -5,8 +5,9 @@ _Last updated: 2026-10-12_
 ## Phase
 **PRODUCTION FULLY OPERATIONAL** (2026-10-12). All required deliverables met and
 verified live in prod: ingestion writes as `signal_writer`, Hot List email sends
-via Resend, human CRM provably untouched. Remaining: optional polish; rotate the
-`signal_writer` password (currently a weak demo value).
+via Resend, human CRM provably untouched. Remaining: optional polish only.
+The `signal_writer` password rotation was reviewed and **intentionally deferred**
+(2026-10-12) — not security-critical, see the env note below.
 
 ## Live deployment
 - **Public URL:** https://signaldesk-vedanth3.vercel.app (Vercel Authentication
@@ -76,9 +77,15 @@ via Resend, human CRM provably untouched. Remaining: optional polish; rotate the
 ## Production env (all set on Vercel + verified)
 - `SIGNAL_WRITER_DATABASE_URL` (aws-0 pooler, role `signal_writer`), `GEMINI_API_KEY`,
   `NEWS_API_KEY`, `RESEND_API_KEY`, `CRON_SECRET`, `HOTLIST_FROM/TO_EMAIL`, and the
-  public Supabase/model/timezone vars. The `signal_writer` password is a weak demo
-  value — rotate it: `alter role signal_writer with password '<strong>';` and update
-  the Vercel var to match. (Actual secrets live only in Vercel + local .env.local.)
+  public Supabase/model/timezone vars. The `signal_writer` password is still the
+  seeded demo value. Rotation was **reviewed and intentionally deferred** (2026-10-12):
+  it is not security-critical because `signal_writer` has `REVOKE ALL` on the
+  human-owned tables (`account_crm`, `contact_history`), so even a compromised
+  credential cannot touch Arjun's CRM — the preservation boundary is enforced by
+  table grants, not this password. If ever rotated:
+  `alter role signal_writer with password '<strong>';` then update
+  `SIGNAL_WRITER_DATABASE_URL` on Vercel and in `.env.local` in lockstep.
+  (Actual secrets live only in Vercel + local .env.local.)
 
 ## Verified in production (2026-10-12)
 - `POST /api/ingest` → writes as `signal_writer` (status success, 0 errors).

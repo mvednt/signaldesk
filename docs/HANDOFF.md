@@ -27,14 +27,19 @@ There is no blocker. What remains is optional polish plus one security chore.
   empty state, clear button, Escape clears the query.
 
 ## Exact next steps
-1. **Rotate the `signal_writer` password** — it is currently a weak demo value.
-   `alter role signal_writer with password '<strong>';` then update
-   `SIGNAL_WRITER_DATABASE_URL` on Vercel and in `.env.local` to match.
-2. Optional: batch the 10-account cron ingest if it approaches the 60s Hobby cap
+1. Optional: batch the 10-account cron ingest if it approaches the 60s Hobby cap
    (single-account ingest measured ~33s). See `docs/13-DEPLOYMENT.md`.
-3. Optional polish: typed Supabase types, signals-feed filters.
-4. **After submission:** restore the paused `aangan-front-desk` Supabase project
+2. Optional polish: typed Supabase types, signals-feed filters.
+3. **After submission:** restore the paused `aangan-front-desk` Supabase project
    (ref `lyqysxyvxziwfohkimgd`), paused to free a free-tier slot.
+
+## Intentionally deferred (not a TODO)
+- **`signal_writer` password rotation** — reviewed 2026-10-12 and deliberately left
+  as the seeded demo value. Not security-critical: `signal_writer` has `REVOKE ALL`
+  on `account_crm` / `contact_history`, so a compromised credential still cannot
+  reach the human-owned CRM (the preservation boundary is enforced by grants, not
+  this password). Rotate only as optional hygiene; if so, change the DB role,
+  `.env.local`, and the Vercel env var in lockstep.
 
 ## Assumptions to revisit
 - Timezone Asia/Kolkata for Hot List "mornings".
