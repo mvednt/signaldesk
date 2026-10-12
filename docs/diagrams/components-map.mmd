@@ -1,0 +1,20 @@
+%% Executive Components Map (editable source).
+%% Polished presentation version: components-map.svg
+flowchart LR
+  T1["<b>1 · Trigger</b><br/>Scheduled scans, manual refresh,<br/>Mon/Thu Hot List schedule"]
+  T2["<b>2 · Input</b><br/>Watchlist + news / press / RSS<br/>(publish dates, source URLs)"]
+  T3["<b>3 · Context</b><br/>Identities & aliases, relevance,<br/>taxonomy, matching, CRM boundary"]
+  T4["<b>4 · Processing</b><br/>Normalize, dedup (content hash),<br/>entity-match, recency windows"]
+  T5["<b>5 · AI — Gemini Flash</b><br/>Classify, explain relevance,<br/>summarize, draft outreach angle"]
+  T6["<b>6 · Output</b><br/>Signal records, ranking, dashboard,<br/>Mon/Thu Hot List email"]
+  T1 --> T2 --> T3 --> T4 --> T5 --> T6
+  N["<b>Nine Checks boundary</b><br/>AI & scheduled jobs write signal-derived data only;<br/>human CRM fields stay unchanged (DB-enforced via the signal_writer role)"]
+  T6 -.-> N
+  classDef sys fill:#f0f9ff,stroke:#0ea5e9,color:#0f172a
+  classDef ai fill:#eef2ff,stroke:#6366f1,color:#0f172a
+  classDef out fill:#ecfdf5,stroke:#10b981,color:#0f172a
+  classDef note fill:#faf5ff,stroke:#c084fc,color:#6b21a8
+  class T1,T2,T3,T4 sys
+  class T5 ai
+  class T6 out
+  class N note

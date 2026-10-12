@@ -26,9 +26,9 @@ live (1 qualifying account; fewer-than-10 behavior correct).
 Public URL live: https://signaldesk-vedanth3.vercel.app (git-linked, SSO off).
 Reads serve real data. Public env vars set.
 
-## P0 — Components Map (exec 6-stage + technical) + diagrams
-Required submission deliverable. `docs/05-COMPONENTS-MAP.md`,
-`docs/COMPONENTS-MAP-TECHNICAL.md`, diagrams.
+## ✅ Done (M6 — Components Map)
+`docs/05-COMPONENTS-MAP.md` (exec, polished SVG+PNG), `COMPONENTS-MAP-TECHNICAL.md`
+(embedded Mermaid), `diagrams/components-map.{svg,png,mmd}`, `technical-architecture.mmd`.
 
 ## P1 — Add Vercel secrets → full production function
 User adds on Vercel: GEMINI_API_KEY, NEWS_API_KEY, SIGNAL_WRITER_DATABASE_URL,

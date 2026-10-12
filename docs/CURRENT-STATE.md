@@ -3,8 +3,8 @@
 _Last updated: 2026-10-12_
 
 ## Phase
-**Milestone 5 — Vercel deployment** (complete; public URL live). Next: Components
-Map, then add production secrets to enable app-driven ingestion/email.
+**Milestone 6 — Components Map** (complete). All required deliverables now met.
+Remaining: add production secrets on Vercel for live ingestion/email; optional polish.
 
 ## Live deployment
 - **Public URL:** https://signaldesk-vedanth3.vercel.app (Vercel Authentication

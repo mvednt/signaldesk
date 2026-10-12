@@ -1,0 +1,55 @@
+%% Technical architecture (editable source). Reflects the actual implementation.
+flowchart TB
+  user([Browser / Arjun])
+  cron["Vercel Cron<br/>daily ingest · Mon/Thu hotlist"]
+
+  subgraph vercel["Next.js on Vercel"]
+    pages["Server Components<br/>/ dashboard · /hotlist"]
+    api["Route handlers<br/>/api/ingest · /api/hotlist<br/>/api/cron/ingest · /api/cron/hotlist"]
+    pipe["lib/pipeline<br/>sources → normalize + dedup → match → score"]
+    ai["lib/ai · Gemini Flash (REST)"]
+    writer["lib/db/writer<br/>pg as signal_writer (allowlisted)"]
+    mail["lib/notifications · Resend"]
+  end
+
+  subgraph ext["External (live data)"]
+    rss["Google News RSS"]
+    news["NewsAPI.org"]
+    gem["Gemini API<br/>gemini-3.8-flash"]
+    resend["Resend"]
+  end
+
+  subgraph db["Supabase Postgres (RLS)"]
+    acc["accounts (shared)"]
+    view["account_dashboard view<br/>get_hotlist() fn"]
+    subgraph human["HUMAN-owned — Arjun only"]
+      crm["account_crm"]
+      hist["contact_history"]
+    end
+    subgraph sys["SYSTEM-owned — signal_writer only"]
+      se["signal_events"]
+      sa["signal_analyses"]
+      sc["account_signal_scores"]
+      os["outreach_suggestions"]
+      ir["ingestion_runs"]
+      nr["notification_runs"]
+    end
+  end
+
+  user --> pages --> view
+  user --> api
+  cron --> api
+  api --> pipe
+  pipe --> rss & news
+  pipe --> ai --> gem
+  pipe --> writer
+  writer --> se & sa & sc & os & ir
+  api --> mail --> resend
+  mail --> nr
+  view --> acc & crm & sc & se & sa & os
+  writer -. "NO privileges (DB-enforced)" .-x human
+
+  classDef human fill:#faf5ff,stroke:#c084fc
+  classDef system fill:#f0f9ff,stroke:#0ea5e9
+  class crm,hist human
+  class se,sa,sc,os,ir,nr system

@@ -211,3 +211,28 @@ off for a public assessment URL; git-linked project auto-deploys future pushes.
 
 **Next step** — Components Map (exec + technical); add Vercel secrets for full
 production function.
+
+---
+
+## 2026-10-12 — M6: Components Map
+**Objective** — The required standalone Components Map: a 30-second executive
+diagram + a technical architecture map, both matching the real build.
+
+**Approach** — Hand-built a polished executive SVG (6 stages, 2-row S-flow, Nine
+Checks boundary footer) for presentation quality; wrote editable Mermaid sources
+for both. No local SVG tools and kroki rejected the Mermaid, so rendered the
+technical diagram with Mermaid in the browser to verify, and embedded it as a live
+```mermaid block in the technical doc (GitHub renders it); converted the exec SVG
+to PNG with `sharp`.
+
+**Changes** — `docs/05-COMPONENTS-MAP.md`, `docs/COMPONENTS-MAP-TECHNICAL.md`,
+`docs/diagrams/components-map.{svg,png,mmd}`, `docs/diagrams/technical-architecture.mmd`.
+
+**Verification** — Both diagrams rendered and reviewed in-browser; exec map legible
+at presentation size; technical map shows the human/system split and the
+`signal_writer` "NO privileges" boundary.
+
+**Documentation updated** — CURRENT-STATE, NEXT-STEPS, this journal.
+
+**Next step** — Add Vercel secrets for live ingestion/email; optional polish
+(account detail page, viva prep docs).
