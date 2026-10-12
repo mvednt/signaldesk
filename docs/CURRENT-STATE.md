@@ -3,8 +3,10 @@
 _Last updated: 2026-10-12_
 
 ## Phase
-**Milestone 6 — Components Map** (complete). All required deliverables now met.
-Remaining: add production secrets on Vercel for live ingestion/email; optional polish.
+**PRODUCTION FULLY OPERATIONAL** (2026-10-12). All required deliverables met and
+verified live in prod: ingestion writes as `signal_writer`, Hot List email sends
+via Resend, human CRM provably untouched. Remaining: optional polish; rotate the
+`signal_writer` password (currently a weak demo value).
 
 ## Live deployment
 - **Public URL:** https://signaldesk-vedanth3.vercel.app (Vercel Authentication
@@ -71,17 +73,20 @@ Remaining: add production secrets on Vercel for live ingestion/email; optional p
   - 7 accounts correctly quiet (no recent trigger). Human CRM fields verified
     unchanged after the writes.
 
-## Pending credentials (user action)
-- **`SIGNAL_WRITER_DATABASE_URL`** — enables the app's own write path
-  (`/api/ingest`, cron ingest, and Hot List run recording). Set `signal_writer`'s
-  password in Supabase + paste the Transaction-pooler string. (Claude is blocked
-  by policy from setting a role password itself.)
-- **`RESEND_API_KEY`** + **`HOTLIST_TO_EMAIL`** — to actually send the Hot List
-  (until then it renders in preview mode).
-- **`CRON_SECRET`** — set in `.env.local` and Vercel so cron routes authorize.
+## Production env (all set on Vercel + verified)
+- `SIGNAL_WRITER_DATABASE_URL` (aws-0 pooler, role `signal_writer`), `GEMINI_API_KEY`,
+  `NEWS_API_KEY`, `RESEND_API_KEY`, `CRON_SECRET`, `HOTLIST_FROM/TO_EMAIL`, and the
+  public Supabase/model/timezone vars. The `signal_writer` password is a weak demo
+  value — rotate it: `alter role signal_writer with password '<strong>';` and update
+  the Vercel var to match. (Actual secrets live only in Vercel + local .env.local.)
 
-## Not started
-- Vercel deploy (env + cron) and production verification.
+## Verified in production (2026-10-12)
+- `POST /api/ingest` → writes as `signal_writer` (status success, 0 errors).
+- `GET /api/cron/hotlist` → email **sent** via Resend; `notification_runs` = sent,
+  idempotent (1/day).
+- Human CRM fields unchanged after all writes.
+- Hobby note: single-account ingest ~33s; full 10-account cron may approach the
+  60s Hobby cap — batch if it times out (see 13-DEPLOYMENT.md).
 - Gemini classification/extraction/scoring; signal writes.
 - Dashboard, Account detail, Signals feed, Hot List UI.
 - Hot List email (Resend) + idempotent run log.
