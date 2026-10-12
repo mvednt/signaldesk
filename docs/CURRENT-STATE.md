@@ -3,8 +3,18 @@
 _Last updated: 2026-10-12_
 
 ## Phase
-**Milestone 4 — Hot List** (complete; verified live in preview). Next: deploy to
-Vercel with env + cron.
+**Milestone 5 — Vercel deployment** (complete; public URL live). Next: Components
+Map, then add production secrets to enable app-driven ingestion/email.
+
+## Live deployment
+- **Public URL:** https://signaldesk-vedanth3.vercel.app (Vercel Authentication
+  disabled → publicly viewable). Project `signaldesk` (`prj_IUwictj0Kx5Gts9NN3lvQLKe7klu`),
+  git-linked to `mvednt/signaldesk` (auto-deploys on push to `main`).
+- Build READY in ~34s; dashboard serves real Supabase data (reads via anon key).
+- **Set on Vercel:** NEXT_PUBLIC_SUPABASE_URL/ANON_KEY, GEMINI_MODEL, APP_TIMEZONE.
+- **Still to add on Vercel (secrets — user, via dashboard):** GEMINI_API_KEY,
+  NEWS_API_KEY, SIGNAL_WRITER_DATABASE_URL, RESEND_API_KEY, HOTLIST_TO_EMAIL,
+  CRON_SECRET — needed for live ingestion + Hot List email/cron.
 
 ## Implemented & verified
 - Next.js (App Router) + TypeScript + Tailwind scaffold; `npm install` clean.

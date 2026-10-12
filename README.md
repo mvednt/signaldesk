@@ -3,6 +3,8 @@
 **B2B Account Signal Intelligence** — MESA AI & Applications end-term (Problem 18:
 B2B Account Signal Monitor).
 
+🔗 **Live:** https://signaldesk-vedanth3.vercel.app · **Repo:** https://github.com/mvednt/signaldesk
+
 SignalDesk monitors public signals (news / press / RSS) for a salesperson's
 account watchlist, uses **Gemini Flash** to classify each signal, explain why it
 matters, and draft an outreach angle, scores and ranks accounts, and emails a

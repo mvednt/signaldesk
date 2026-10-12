@@ -181,3 +181,33 @@ Resend preview-mode keeps the pipeline testable; Hobby cron limits + fallback.
 
 **Next step** — Deploy to Vercel (env + cron) and verify on the public URL; then
 the Components Map.
+
+---
+
+## 2026-10-12 — M5: Vercel deployment
+**Objective** — Ship a working public URL serving real data.
+
+**Approach** — Vercel CLI wasn't authenticated (interactive login), so used the
+Vercel connector. Created project `signaldesk` git-linked to `mvednt/signaldesk`
+(auto-deploy on push), framework nextjs, with the **public** env vars only
+(Supabase URL + publishable key, GEMINI_MODEL, APP_TIMEZONE) — Claude is blocked
+by policy from writing secret env vars, so those are added by the user. Disabled
+Vercel Authentication (`ssoProtection: null`) so the URL is truly public. Triggered
+a production deployment from `main`.
+
+**Verification (live)** — Deployment `dpl_EyuZomGG…` state READY in ~34s. Public
+URL https://signaldesk-vedanth3.vercel.app returns 200 and the HTML contains the
+real dashboard (SignalDesk, Ola Electric, PhonePe, "3 warm this cycle").
+
+**Trade-offs / pending** — Reads work publicly now; app-driven ingestion, Hot List
+email and cron need the secret env vars added on Vercel. The connector maps to
+scope `vedanth3`; an explicit team id was rejected (use default scope).
+
+**Technical learning (viva)** — Why only reads work without secrets (NEXT_PUBLIC
+vars inline at build; server AI/DB paths need secrets); why SSO protection must be
+off for a public assessment URL; git-linked project auto-deploys future pushes.
+
+**Documentation updated** — README, CURRENT-STATE, this journal, NEXT-STEPS.
+
+**Next step** — Components Map (exec + technical); add Vercel secrets for full
+production function.

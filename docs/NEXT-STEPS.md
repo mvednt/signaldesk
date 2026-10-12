@@ -22,12 +22,19 @@ Strict 3-day `get_hotlist` RPC, email render + Resend (preview fallback), `/hotl
 page, preview + cron routes, `vercel.json` crons, idempotency proven. Verified
 live (1 qualifying account; fewer-than-10 behavior correct).
 
-## P0 — Deploy to Vercel (see docs/13-DEPLOYMENT.md)
-Import repo → set env (incl. `SIGNAL_WRITER_DATABASE_URL`, `RESEND_API_KEY`,
-`CRON_SECRET`, `HOTLIST_TO_EMAIL`) → deploy → verify public URL + a real cron hit.
+## ✅ Done (M5 — Vercel deploy)
+Public URL live: https://signaldesk-vedanth3.vercel.app (git-linked, SSO off).
+Reads serve real data. Public env vars set.
 
-## P1 — Components Map (exec 6-stage + technical) + diagrams
-## P1 — Enable app write path end-to-end (connection string) + full ingestion run
+## P0 — Components Map (exec 6-stage + technical) + diagrams
+Required submission deliverable. `docs/05-COMPONENTS-MAP.md`,
+`docs/COMPONENTS-MAP-TECHNICAL.md`, diagrams.
+
+## P1 — Add Vercel secrets → full production function
+User adds on Vercel: GEMINI_API_KEY, NEWS_API_KEY, SIGNAL_WRITER_DATABASE_URL,
+RESEND_API_KEY, HOTLIST_TO_EMAIL, CRON_SECRET. Then hit `/api/cron/ingest` and
+`/api/cron/hotlist` with the bearer to verify end-to-end in prod.
+
 ## P2 — Account detail page, signals feed, filters; typed Supabase types; viva docs
 
 ## P2 — Dashboard, Hot List selection + Resend email + idempotent run log
