@@ -32,7 +32,7 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
   }, []);
 
   const nav = [
-    { href: "/", label: "Dashboard", icon: "space_dashboard" },
+    { href: "/", label: "Overview", icon: "space_dashboard" },
     { href: "/hotlist", label: "Hot List", icon: "local_fire_department", badge: String(hotCount), hot: true },
     { href: "/accounts", label: "Accounts", icon: "apartment", badge: String(rows.length) },
   ];
@@ -46,7 +46,7 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
         <aside style={glassStyle} className="glass flex flex-col gap-7 rounded-3xl px-[18px] pb-[18px] pt-7 lg:sticky lg:top-4 lg:h-[calc(100vh-32px)]">
           <Link
             href="/"
-            aria-label="SignalDesk — back to dashboard"
+            aria-label="SignalDesk — back to overview"
             className="sd-press group flex items-center gap-2.5 rounded-2xl px-2.5 py-1.5 no-underline hover:bg-white/50"
           >
             <div className="flex h-[34px] w-[34px] items-center justify-center rounded-[11px] bg-ember shadow-[0_8px_22px_-8px_rgba(226,85,43,.8)] transition-transform duration-300 group-hover:scale-110 group-hover:rotate-[-6deg]">

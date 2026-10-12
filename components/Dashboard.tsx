@@ -23,7 +23,7 @@ export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; 
 
   return (
     <>
-      <PageHeader title="Dashboard" subtitle="Which accounts should you contact right now, what happened, and what should you say.">
+      <PageHeader title="Overview" subtitle="Which accounts should you contact right now, what happened, and what should you say.">
         <Link
           href="/hotlist/email"
           className="sd-press flex h-12 items-center gap-2 rounded-full bg-ink pl-[18px] pr-[22px] text-[15px] font-medium text-white no-underline hover:bg-[#2a2d34]"
