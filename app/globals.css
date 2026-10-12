@@ -34,7 +34,11 @@ body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
-a { color: inherit; }
+/* Scope to the base layer so Tailwind text-* utilities (e.g. text-white on
+   anchor buttons / dark KPI cards) still win. An unlayered rule would override them. */
+@layer base {
+  a { color: inherit; }
+}
 
 .material-symbols-rounded {
   font-family: "Material Symbols Rounded";
