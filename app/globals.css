@@ -1,8 +1,126 @@
 @import "tailwindcss";
 
+/* ============================================================
+   THEME TOKENS — light is the bare :root; dark is redefined under
+   both prefers-color-scheme (system) and [data-theme="dark"] (toggle),
+   so either path wins. `--panel` is a surface that stays dark in BOTH
+   themes (write-boundary card, dark buttons); `--ink` is the primary
+   foreground and flips to light in dark.
+   ============================================================ */
 :root {
   --background: #eeede8;
   --foreground: #15171c;
+
+  --canvas: #eeede8;
+  --paper: #f7f6f2;
+  --surface: #ffffff;
+  --ink: #15171c;
+  --ink-2: #3a3d44;
+  --muted: #74777e;
+  --faint: #9a9da3;
+  --line: #f0eee9;
+  --track: #efede7;
+  --chip: #e3e0d9;
+  --panel: #15171c;
+  --ember: #e2552b;
+  --ember-dark: #c2441e;
+  --ember-soft: #fbe7df;
+  --ember-ink: #a93a18;
+  --human: #8f7bea;
+  --human-soft: #eeeafb;
+  --human-ink: #4e3ba8;
+
+  --glass-bg: rgba(247, 246, 242, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-inset: rgba(255, 255, 255, 0.7);
+  --glass-shadow: 0 24px 64px -34px rgba(21, 23, 28, 0.34);
+  --glass-card-bg: rgba(255, 255, 255, 0.62);
+  --glass-card-border: rgba(255, 255, 255, 0.72);
+  --glass-card-inset: rgba(255, 255, 255, 0.55);
+  --glass-card-shadow: 0 18px 48px -30px rgba(21, 23, 28, 0.34);
+
+  --aurora-1: rgba(226, 85, 43, 0.28);
+  --aurora-2: rgba(143, 123, 234, 0.26);
+  --aurora-3: rgba(226, 85, 43, 0.12);
+  --aurora-4: rgba(143, 123, 234, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: #0e1116;
+    --foreground: #e9ecf1;
+    --canvas: #0e1116;
+    --paper: #171b22;
+    --surface: #1c2029;
+    --ink: #e9ecf1;
+    --ink-2: #c3c8d0;
+    --muted: #9aa0a9;
+    --faint: #727782;
+    --line: #262b33;
+    --track: #242a33;
+    --chip: #2c323c;
+    --panel: #222834;
+    --ember: #f0623a;
+    --ember-dark: #f58358;
+    --ember-soft: #2d1711;
+    --ember-ink: #f2a385;
+    --human: #a593f2;
+    --human-soft: #241e3c;
+    --human-ink: #c9bdf7;
+
+    --glass-bg: rgba(23, 27, 34, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-inset: rgba(255, 255, 255, 0.06);
+    --glass-shadow: 0 24px 64px -34px rgba(0, 0, 0, 0.6);
+    --glass-card-bg: rgba(28, 32, 41, 0.6);
+    --glass-card-border: rgba(255, 255, 255, 0.09);
+    --glass-card-inset: rgba(255, 255, 255, 0.05);
+    --glass-card-shadow: 0 18px 48px -30px rgba(0, 0, 0, 0.6);
+
+    --aurora-1: rgba(226, 85, 43, 0.2);
+    --aurora-2: rgba(143, 123, 234, 0.18);
+    --aurora-3: rgba(226, 85, 43, 0.1);
+    --aurora-4: rgba(143, 123, 234, 0.1);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --background: #0e1116;
+  --foreground: #e9ecf1;
+  --canvas: #0e1116;
+  --paper: #171b22;
+  --surface: #1c2029;
+  --ink: #e9ecf1;
+  --ink-2: #c3c8d0;
+  --muted: #9aa0a9;
+  --faint: #727782;
+  --line: #262b33;
+  --track: #242a33;
+  --chip: #2c323c;
+  --panel: #222834;
+  --ember: #f0623a;
+  --ember-dark: #f58358;
+  --ember-soft: #2d1711;
+  --ember-ink: #f2a385;
+  --human: #a593f2;
+  --human-soft: #241e3c;
+  --human-ink: #c9bdf7;
+
+  --glass-bg: rgba(23, 27, 34, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-inset: rgba(255, 255, 255, 0.06);
+  --glass-shadow: 0 24px 64px -34px rgba(0, 0, 0, 0.6);
+  --glass-card-bg: rgba(28, 32, 41, 0.6);
+  --glass-card-border: rgba(255, 255, 255, 0.09);
+  --glass-card-inset: rgba(255, 255, 255, 0.05);
+  --glass-card-shadow: 0 18px 48px -30px rgba(0, 0, 0, 0.6);
+
+  --aurora-1: rgba(226, 85, 43, 0.2);
+  --aurora-2: rgba(143, 123, 234, 0.18);
+  --aurora-3: rgba(226, 85, 43, 0.1);
+  --aurora-4: rgba(143, 123, 234, 0.1);
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -11,21 +129,24 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  --color-canvas: #eeede8;
-  --color-paper: #f7f6f2;
-  --color-ink: #15171c;
-  --color-ink-2: #3a3d44;
-  --color-muted: #74777e;
-  --color-faint: #9a9da3;
-  --color-line: #f0eee9;
-  --color-track: #efede7;
-  --color-ember: #e2552b;
-  --color-ember-dark: #c2441e;
-  --color-ember-soft: #fbe7df;
-  --color-ember-ink: #a93a18;
-  --color-human: #8f7bea;
-  --color-human-soft: #eeeafb;
-  --color-human-ink: #4e3ba8;
+  --color-canvas: var(--canvas);
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-track: var(--track);
+  --color-chip: var(--chip);
+  --color-panel: var(--panel);
+  --color-ember: var(--ember);
+  --color-ember-dark: var(--ember-dark);
+  --color-ember-soft: var(--ember-soft);
+  --color-ember-ink: var(--ember-ink);
+  --color-human: var(--human);
+  --color-human-soft: var(--human-soft);
+  --color-human-ink: var(--human-ink);
 }
 
 body {
@@ -44,10 +165,10 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(44vw 44vw at 14% 8%, rgba(226, 85, 43, 0.28), transparent 60%),
-    radial-gradient(42vw 42vw at 90% 2%, rgba(143, 123, 234, 0.26), transparent 62%),
-    radial-gradient(50vw 50vw at 64% 52%, rgba(226, 85, 43, 0.12), transparent 64%),
-    radial-gradient(38vw 38vw at 30% 80%, rgba(143, 123, 234, 0.12), transparent 66%);
+    radial-gradient(44vw 44vw at 14% 8%, var(--aurora-1), transparent 60%),
+    radial-gradient(42vw 42vw at 90% 2%, var(--aurora-2), transparent 62%),
+    radial-gradient(50vw 50vw at 64% 52%, var(--aurora-3), transparent 64%),
+    radial-gradient(38vw 38vw at 30% 80%, var(--aurora-4), transparent 66%);
   filter: blur(6px);
   animation: sd-drift 26s ease-in-out infinite alternate;
 }
@@ -55,20 +176,20 @@ body::before {
 /* Frosted-glass surfaces (sidebar, header, main frame).
    Defined as Tailwind v4 @utility so Lightning CSS keeps backdrop-filter. */
 @utility glass {
-  background: rgba(247, 246, 242, 0.55);
+  background: var(--glass-bg);
   -webkit-backdrop-filter: blur(26px) saturate(1.65);
   backdrop-filter: blur(26px) saturate(1.65);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 24px 64px -34px rgba(21, 23, 28, 0.34);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-inset), var(--glass-shadow);
 }
 
-/* Glassy inner card — translucent white over the aurora */
+/* Glassy inner card — translucent surface over the aurora */
 @utility glass-card {
-  background: rgba(255, 255, 255, 0.62);
+  background: var(--glass-card-bg);
   -webkit-backdrop-filter: blur(20px) saturate(1.5);
   backdrop-filter: blur(20px) saturate(1.5);
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 18px 48px -30px rgba(21, 23, 28, 0.34);
+  border: 1px solid var(--glass-card-border);
+  box-shadow: inset 0 1px 0 var(--glass-card-inset), var(--glass-card-shadow);
 }
 
 /* Motion primitives */

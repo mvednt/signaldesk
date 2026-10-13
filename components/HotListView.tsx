@@ -63,7 +63,7 @@ export default function HotListView({ items, rows, runDate, windowDays, error }:
       ))}
 
       {!error && n < 10 && (
-        <div className="rounded-[18px] border-[1.5px] border-dashed border-[#d6d3cb] px-5 py-[18px] text-sm leading-[1.55] text-pretty text-[#5e6168]">
+        <div className="rounded-[18px] border-[1.5px] border-dashed border-line px-5 py-[18px] text-sm leading-[1.55] text-pretty text-muted">
           {n === 0
             ? `No accounts have a qualifying signal in the last ${windowDays} days.`
             : `Only ${n} account${n === 1 ? "" : "s"} qualified in the last ${windowDays} days.`}{" "}

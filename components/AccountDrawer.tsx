@@ -15,11 +15,11 @@ export default function AccountDrawer({ row: r, onClose }: { row: DashboardRow; 
 
   return (
     <>
-      <div onClick={onClose} className="sd-fade fixed inset-0 z-40 bg-ink/30 backdrop-blur-[3px]" style={{ animation: "sd-fade .25s ease both" }} />
+      <div onClick={onClose} className="sd-fade fixed inset-0 z-40 bg-panel/50 backdrop-blur-[3px]" style={{ animation: "sd-fade .25s ease both" }} />
       <aside
         role="dialog"
         aria-label={r.name}
-        className="sd-drawer fixed bottom-3 right-3 top-3 z-41 flex w-[min(480px,calc(100vw-24px))] flex-col overflow-y-auto rounded-3xl bg-white/85 shadow-[0_30px_80px_rgba(21,23,28,.25)] backdrop-blur-2xl"
+        className="sd-drawer fixed bottom-3 right-3 top-3 z-41 flex w-[min(480px,calc(100vw-24px))] flex-col overflow-y-auto rounded-3xl bg-surface/90 shadow-[0_30px_80px_rgba(21,23,28,.25)] backdrop-blur-2xl"
       >
         <div className="flex items-start gap-3.5 border-b border-line px-6 pb-[18px] pt-6">
           <Avatar name={r.name} size={52} />
@@ -70,17 +70,17 @@ export default function AccountDrawer({ row: r, onClose }: { row: DashboardRow; 
               {r.top_outreach_angle && <OutreachBox text={r.top_outreach_angle} />}
 
               <div className="flex flex-col gap-2.5 pt-1">
-                <div className="text-[11px] font-medium tracking-[0.08em] text-[#8a8d93]">WHY THIS SCORE</div>
+                <div className="text-[11px] font-medium tracking-[0.08em] text-faint">WHY THIS SCORE</div>
                 {comps.map(([label, v]) => (
                   <div key={label} className="grid grid-cols-[96px_minmax(0,1fr)_40px] items-center gap-3 text-[13px]">
                     <span className="text-ink-2">{label}</span>
                     <span className="h-1.5 overflow-hidden rounded-full bg-track">
                       <span className="block h-full bg-ink" style={{ width: `${Math.min(100, (v ?? 0) * 100)}%` }} />
                     </span>
-                    <span className="text-right font-mono text-xs text-[#5e6168]">{v != null ? v.toFixed(2) : "—"}</span>
+                    <span className="text-right font-mono text-xs text-muted">{v != null ? v.toFixed(2) : "—"}</span>
                   </div>
                 ))}
-                <div className="font-mono text-xs text-[#8a8d93]">100 × recency × trigger × source × match × confidence</div>
+                <div className="font-mono text-xs text-faint">100 × recency × trigger × source × match × confidence</div>
               </div>
             </>
           ) : (
@@ -90,7 +90,7 @@ export default function AccountDrawer({ row: r, onClose }: { row: DashboardRow; 
           )}
         </div>
 
-        <div className="flex flex-1 flex-col gap-3.5 bg-[#faf9fe] px-6 py-[22px]">
+        <div className="flex flex-1 flex-col gap-3.5 bg-human-soft px-6 py-[22px]">
           <span className="flex items-center gap-[7px] text-xs font-medium text-human-ink">
             <span className="h-2 w-2 rounded-full bg-human" />
             ARJUN&apos;S OWN · NEVER OVERWRITTEN
@@ -101,13 +101,13 @@ export default function AccountDrawer({ row: r, onClose }: { row: DashboardRow; 
               <span className="rounded-full bg-human-ink px-2 py-0.5 text-xs font-medium text-white">pinned P{r.priority_override}</span>
             )}
           </div>
-          <p className="m-0 text-[14.5px] leading-[1.55] text-pretty text-[#2a2440]">{r.relationship_notes ?? "—"}</p>
+          <p className="m-0 text-[14.5px] leading-[1.55] text-pretty text-ink-2">{r.relationship_notes ?? "—"}</p>
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1 rounded-[14px] bg-white px-3.5 py-3">
+            <div className="flex flex-col gap-1 rounded-[14px] bg-surface px-3.5 py-3">
               <span className="text-xs text-muted">Last contact</span>
               <span className="text-[14.5px] font-medium">{fmtDate(r.last_contact_at)}</span>
             </div>
-            <div className="flex flex-col gap-1 rounded-[14px] bg-white px-3.5 py-3">
+            <div className="flex flex-col gap-1 rounded-[14px] bg-surface px-3.5 py-3">
               <span className="text-xs text-muted">Next step</span>
               <span className="text-[14.5px] font-medium">{r.next_step ?? "—"}</span>
             </div>

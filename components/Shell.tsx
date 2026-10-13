@@ -7,6 +7,11 @@ import type { ReactNode } from "react";
 import type { DashboardRow } from "@/lib/data";
 import { Avatar, Icon, StageChip, glassStyle, matchesQuery } from "./ui";
 import AccountDrawer from "./AccountDrawer";
+import LoginScreen from "./LoginScreen";
+import ProfileMenu from "./ProfileMenu";
+import ThemeToggle from "./ThemeToggle";
+
+const ARJUN = { name: "Arjun", email: "arjun@signaldesk.app", role: "Account Executive" };
 
 type ShellCtx = { query: string; setQuery: (q: string) => void; openAccount: (id: string) => void; selectedId: string | null };
 const Ctx = createContext<ShellCtx>({ query: "", setQuery: () => {}, openAccount: () => {}, selectedId: null });
@@ -19,6 +24,26 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
   const searchRef = useRef<HTMLInputElement>(null);
   const openAccount = useCallback((id: string) => setSelectedId(id), []);
 
+  // Demo sign-in gate. `null` until mounted so SSR and first client paint match.
+  const [authed, setAuthed] = useState<boolean | null>(null);
+  useEffect(() => {
+    try {
+      setAuthed(sessionStorage.getItem("sd-auth") === "1");
+    } catch {
+      setAuthed(false);
+    }
+  }, []);
+  const login = useCallback(() => {
+    try { sessionStorage.setItem("sd-auth", "1"); } catch {}
+    setAuthed(true);
+  }, []);
+  const logout = useCallback(() => {
+    try { sessionStorage.removeItem("sd-auth"); } catch {}
+    setSelectedId(null);
+    setQuery("");
+    setAuthed(false);
+  }, []);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -30,6 +55,21 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  if (authed === null) {
+    return (
+      <div className="flex min-h-screen items-center justify-center text-ink">
+        <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[12px] bg-ember shadow-[0_8px_22px_-8px_rgba(226,85,43,.8)] [animation:sd-pulse_1.4s_ease-in-out_infinite]">
+          <svg width="38" height="38" viewBox="0 0 34 34" fill="none" aria-hidden="true">
+            <circle cx="13" cy="21" r="3" fill="#fff" />
+            <path d="M20 21A7 7 0 0 0 13 14" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
+            <path d="M24 21A11 11 0 0 0 13 10" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
+          </svg>
+        </div>
+      </div>
+    );
+  }
+  if (!authed) return <LoginScreen onSuccess={login} />;
 
   const nav = [
     { href: "/", label: "Overview", icon: "space_dashboard" },
@@ -47,7 +87,7 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
           <Link
             href="/"
             aria-label="SignalDesk — back to overview"
-            className="sd-press group flex items-center gap-2.5 rounded-2xl px-2.5 py-1.5 no-underline hover:bg-white/50"
+            className="sd-press group flex items-center gap-2.5 rounded-2xl px-2.5 py-1.5 no-underline hover:bg-surface/50"
           >
             <div className="flex h-[34px] w-[34px] items-center justify-center rounded-[11px] bg-ember shadow-[0_8px_22px_-8px_rgba(226,85,43,.8)] transition-transform duration-300 group-hover:scale-110 group-hover:rotate-[-6deg]">
               <svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true">
@@ -60,7 +100,7 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
           </Link>
 
           <nav className="flex flex-col gap-1">
-            <div className="px-3 pb-2 text-[11px] font-medium tracking-[0.08em] text-[#8a8d93]">MENU</div>
+            <div className="px-3 pb-2 text-[11px] font-medium tracking-[0.08em] text-faint">MENU</div>
             {nav.map((n) => {
               const active = n.href === "/" ? pathname === "/" : pathname.startsWith(n.href);
               return (
@@ -68,7 +108,7 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
                   key={n.href}
                   href={n.href}
                   className={`sd-press flex h-11 items-center gap-3 rounded-xl px-3 text-[15px] no-underline hover:bg-track ${
-                    active ? "bg-white font-semibold text-ink" : "text-[#5e6168]"
+                    active ? "bg-surface font-semibold text-ink" : "text-muted"
                   }`}
                 >
                   <Icon name={n.icon} size={21} />
@@ -76,7 +116,7 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
                   {n.badge && (
                     <span
                       className={`flex h-5 min-w-6 items-center justify-center rounded-full px-[7px] text-[11px] font-semibold ${
-                        n.hot ? "bg-ember text-white" : "bg-[#e3e0d9] text-ink-2"
+                        n.hot ? "bg-ember text-white" : "bg-chip text-ink-2"
                       }`}
                     >
                       {n.badge}
@@ -87,7 +127,7 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
             })}
           </nav>
 
-          <div className="mt-auto hidden flex-col gap-3 rounded-[18px] bg-ink p-[18px] text-[#f4f2ec] lg:flex">
+          <div className="mt-auto hidden flex-col gap-3 rounded-[18px] bg-panel p-[18px] text-[#f4f2ec] lg:flex">
             <div className="flex items-center gap-2 text-[13px] font-semibold">
               <Icon name="shield_lock" size={18} className="text-[#f08a63]" />
               Write boundary
@@ -103,10 +143,10 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
         </aside>
 
         <div className="flex min-w-0 flex-col gap-4">
-          <header style={glassStyle} className="glass flex flex-wrap items-center gap-3.5 rounded-3xl px-[18px] py-3.5">
+          <header style={glassStyle} className="glass relative z-20 flex flex-wrap items-center gap-3.5 rounded-3xl px-[18px] py-3.5">
             <div className="relative max-w-[440px] flex-[1_1_280px]">
-              <label className="flex h-12 w-full items-center gap-2.5 rounded-full bg-white pl-[18px] pr-2">
-                <Icon name="search" size={22} className="text-[#5e6168]" />
+              <label className="flex h-12 w-full items-center gap-2.5 rounded-full bg-surface pl-[18px] pr-2">
+                <Icon name="search" size={22} className="text-muted" />
                 <input
                   ref={searchRef}
                   value={query}
@@ -118,16 +158,16 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
                   <button
                     onClick={() => { setQuery(""); searchRef.current?.focus(); }}
                     aria-label="Clear search"
-                    className="flex h-7 w-7 items-center justify-center rounded-full text-[#5e6168] hover:bg-track"
+                    className="flex h-7 w-7 items-center justify-center rounded-full text-muted hover:bg-track"
                   >
                     <Icon name="close" size={18} />
                   </button>
                 ) : (
-                  <kbd className="flex h-7 items-center rounded-lg bg-track px-2.5 font-mono text-xs text-[#5e6168]">⌘K</kbd>
+                  <kbd className="flex h-7 items-center rounded-lg bg-track px-2.5 font-mono text-xs text-muted">⌘K</kbd>
                 )}
               </label>
               {q && (
-                <div className="absolute inset-x-0 top-[54px] z-30 flex flex-col gap-0.5 rounded-2xl bg-white p-2 shadow-[0_24px_70px_rgba(21,23,28,.20)]">
+                <div className="absolute inset-x-0 top-[54px] z-30 flex flex-col gap-0.5 rounded-2xl bg-surface p-2 shadow-[0_24px_70px_rgba(21,23,28,.20)]">
                   {results.length === 0 ? (
                     <div className="px-3 py-3 text-sm text-muted">No accounts match “{query}”.</div>
                   ) : (
@@ -151,20 +191,23 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
               )}
             </div>
             <div className="flex-1" />
+            <ThemeToggle />
             <Link
               href="/hotlist"
               title="Hot List"
-              className="sd-press relative flex h-12 w-12 items-center justify-center rounded-full bg-white hover:bg-track"
+              className="sd-press relative flex h-12 w-12 items-center justify-center rounded-full bg-surface hover:bg-track"
             >
               <Icon name="notifications" size={22} />
-              {hotCount > 0 && <span className="absolute right-[13px] top-3 h-2 w-2 rounded-full border-2 border-white bg-ember" />}
+              {hotCount > 0 && <span className="absolute right-[13px] top-3 h-2 w-2 rounded-full border-2 border-surface bg-ember" />}
             </Link>
-            <div className="flex items-center gap-3 pl-1">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-human-soft text-base font-semibold text-human-ink">A</div>
-              <div className="flex flex-col gap-0.5">
-                <div className="text-[15px] font-semibold">Arjun</div>
-                <div className="text-[13px] text-muted">Account Executive · {rows.length} accounts</div>
-              </div>
+            <div className="pl-1">
+              <ProfileMenu
+                name={ARJUN.name}
+                email={ARJUN.email}
+                role={ARJUN.role}
+                accounts={rows.length}
+                onLogout={logout}
+              />
             </div>
           </header>
 

@@ -27,7 +27,7 @@ export default function AccountsTable({ rows, error }: { rows: DashboardRow[]; e
           <button
             onClick={() => setWarmOnly((v) => !v)}
             className={`h-8 cursor-pointer rounded-full border-[1.5px] px-[13px] text-[13px] font-medium ${
-              warmOnly ? "border-ember bg-ember text-white" : "border-[#e3e0d9] bg-transparent text-ink-2 hover:border-ink"
+              warmOnly ? "border-ember bg-ember text-white" : "border-chip bg-transparent text-ink-2 hover:border-ink"
             }`}
           >
             Warm only
@@ -40,10 +40,10 @@ export default function AccountsTable({ rows, error }: { rows: DashboardRow[]; e
 
       <div style={glassStyle} className="glass-card sd-rise overflow-x-auto rounded-[22px] px-3.5 py-2">
         <div className="min-w-[860px]">
-          <div className={`grid ${COLS} gap-4 px-2 py-3.5 text-[11px] font-medium tracking-[0.08em] text-[#8a8d93]`}>
+          <div className={`grid ${COLS} gap-4 px-2 py-3.5 text-[11px] font-medium tracking-[0.08em] text-faint`}>
             <span>ACCOUNT</span>
             <span>STAGE</span>
-            <span className="text-[#6a55c9]">ARJUN&apos;S NOTES</span>
+            <span className="text-human-ink">ARJUN&apos;S NOTES</span>
             <span>LAST CONTACT</span>
             <span>NEXT STEP</span>
             <span className="text-right">SCORE</span>
@@ -53,7 +53,7 @@ export default function AccountsTable({ rows, error }: { rows: DashboardRow[]; e
               key={r.account_id}
               onClick={() => openAccount(r.account_id)}
               className={`grid w-full ${COLS} cursor-pointer items-center gap-4 rounded-[10px] border-0 border-t border-line px-2 py-3.5 text-left hover:bg-paper ${
-                selectedId === r.account_id ? "bg-[#fbf3ef]" : "bg-transparent"
+                selectedId === r.account_id ? "bg-ember-soft" : "bg-transparent"
               }`}
             >
               <span className="flex min-w-0 items-center gap-2.5">
@@ -67,7 +67,7 @@ export default function AccountsTable({ rows, error }: { rows: DashboardRow[]; e
               <span className="text-[13.5px] leading-[1.45] text-pretty text-ink-2">{r.relationship_notes ?? "—"}</span>
               <span className="text-[13.5px] text-ink-2">{fmtDate(r.last_contact_at)}</span>
               <span className="text-[13.5px] text-ink-2">{r.next_step ?? "—"}</span>
-              <span className={`text-right text-[17px] font-semibold tabular-nums ${r.score > 0 ? "text-ink" : "text-[#b0b2b7]"}`}>
+              <span className={`text-right text-[17px] font-semibold tabular-nums ${r.score > 0 ? "text-ink" : "text-faint"}`}>
                 {r.score.toFixed(0)}
               </span>
             </button>

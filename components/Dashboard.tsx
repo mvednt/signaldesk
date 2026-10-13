@@ -26,14 +26,14 @@ export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; 
       <PageHeader title="Overview" subtitle="Which accounts should you contact right now, what happened, and what should you say.">
         <Link
           href="/hotlist/email"
-          className="sd-press flex h-12 items-center gap-2 rounded-full bg-ink pl-[18px] pr-[22px] text-[15px] font-medium text-white no-underline hover:bg-[#2a2d34]"
+          className="sd-press flex h-12 items-center gap-2 rounded-full bg-panel pl-[18px] pr-[22px] text-[15px] font-medium text-white no-underline hover:bg-[#2a2d34]"
         >
           <Icon name="mail" />
           Preview email
         </Link>
         <Link
           href="/hotlist"
-          className="sd-press flex h-12 items-center rounded-full border-[1.5px] border-ink px-[22px] text-[15px] font-medium text-ink no-underline hover:bg-white"
+          className="sd-press flex h-12 items-center rounded-full border-[1.5px] border-ink px-[22px] text-[15px] font-medium text-ink no-underline hover:bg-surface"
         >
           Open Hot List
         </Link>
@@ -66,8 +66,8 @@ export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; 
               const isTop = i === 0 && isWarm;
               const h = isWarm ? Math.round(56 + (r.score / maxScore) * 140) : 46;
               const bg = isWarm
-                ? r.score >= 30 ? "#15171c" : r.score >= 20 ? "#e2552b" : "#f2a385"
-                : "repeating-linear-gradient(-45deg,#d9d6cf 0 3px,transparent 3px 8px)";
+                ? r.score >= 30 ? "var(--ink)" : r.score >= 20 ? "#e2552b" : "#f2a385"
+                : "repeating-linear-gradient(-45deg,var(--chip) 0 3px,transparent 3px 8px)";
               return (
                 <button
                   key={r.account_id}
@@ -77,7 +77,7 @@ export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; 
                 >
                   <span
                     className={`rounded-full px-[7px] py-0.5 font-mono text-[11.5px] font-semibold ${
-                      isTop ? "bg-ember text-white" : isWarm ? "text-ink" : "text-[#b0b2b7]"
+                      isTop ? "bg-ember text-white" : isWarm ? "text-ink" : "text-faint"
                     }`}
                   >
                     {r.score.toFixed(0)}
@@ -122,7 +122,7 @@ export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; 
         <Card className="flex-[1_1_260px] gap-3.5">
           <div className="flex items-center justify-between">
             <CardTitle>Pipeline</CardTitle>
-            <span className="text-xs font-medium text-[#6a55c9]">Arjun&apos;s stages</span>
+            <span className="text-xs font-medium text-human-ink">Arjun&apos;s stages</span>
           </div>
           <div className="flex flex-col gap-1.5">
             {stages.map((s) => {
@@ -132,7 +132,7 @@ export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; 
                 <button
                   key={s}
                   onClick={() => setStage(stage === s ? "all" : s)}
-                  className={`flex cursor-pointer flex-col gap-2 rounded-[14px] border-0 px-3 py-2.5 text-left hover:bg-[#f4f2fb] ${stage === s ? "bg-[#f4f2fb]" : "bg-transparent"}`}
+                  className={`flex cursor-pointer flex-col gap-2 rounded-[14px] border-0 px-3 py-2.5 text-left hover:bg-human-soft ${stage === s ? "bg-human-soft" : "bg-transparent"}`}
                 >
                   <div className="flex items-center justify-between text-[14.5px]">
                     <span className="font-medium">{cap(s)}</span>
@@ -140,7 +140,7 @@ export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; 
                   </div>
                   <div className="flex h-1.5 overflow-hidden rounded-full bg-track">
                     <span className="bg-ember" style={{ width: `${(w / maxStage) * 100}%` }} />
-                    <span className="bg-[#c9c1ee]" style={{ width: `${((all.length - w) / maxStage) * 100}%` }} />
+                    <span className="bg-human/50" style={{ width: `${((all.length - w) / maxStage) * 100}%` }} />
                   </div>
                 </button>
               );
@@ -161,7 +161,7 @@ export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; 
                 key={r.account_id}
                 onClick={() => openAccount(r.account_id)}
                 className={`grid cursor-pointer grid-cols-[28px_44px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border-0 border-t border-line px-2 py-3 text-left hover:bg-paper ${
-                  selectedId === r.account_id ? "bg-[#fbf3ef]" : "bg-transparent"
+                  selectedId === r.account_id ? "bg-ember-soft" : "bg-transparent"
                 }`}
               >
                 <span className="font-mono text-xs text-faint">#{rows.indexOf(r) + 1}</span>
@@ -181,7 +181,7 @@ export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; 
                     <span
                       style={{
                         width: `${Math.min(100, r.score * 2.5)}%`,
-                        background: r.score >= 20 ? "#e2552b" : r.score > 0 ? "#f0a07f" : "#e3e0d9",
+                        background: r.score >= 20 ? "#e2552b" : r.score > 0 ? "#f0a07f" : "var(--chip)",
                       }}
                     />
                   </span>
@@ -199,7 +199,7 @@ export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; 
             <CardTitle>Portfolio warmth</CardTitle>
             <div className="relative flex justify-center pt-1.5">
               <svg viewBox="0 0 240 130" className="w-full max-w-[280px]">
-                <path d="M 24 116 A 96 96 0 0 1 216 116" fill="none" stroke="#efede7" strokeWidth="26" strokeLinecap="round" />
+                <path d="M 24 116 A 96 96 0 0 1 216 116" fill="none" stroke="var(--track)" strokeWidth="26" strokeLinecap="round" />
                 <path
                   d="M 24 116 A 96 96 0 0 1 216 116"
                   fill="none"
@@ -217,7 +217,7 @@ export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; 
             </div>
             <div className="flex justify-center gap-5 pt-2.5 text-[13px] text-ink-2">
               <span className="flex items-center gap-[7px]"><span className="h-2.5 w-2.5 rounded-full bg-ember" />Warm {warm.length}</span>
-              <span className="flex items-center gap-[7px]"><span className="h-2.5 w-2.5 rounded-full bg-[#e3e0d9]" />Quiet {rows.length - warm.length}</span>
+              <span className="flex items-center gap-[7px]"><span className="h-2.5 w-2.5 rounded-full bg-chip" />Quiet {rows.length - warm.length}</span>
             </div>
           </Card>
 
@@ -235,7 +235,7 @@ export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; 
               href="/api/hotlist?format=html"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-[46px] items-center justify-center gap-2 rounded-full bg-white text-[14.5px] font-medium text-ink no-underline hover:bg-[#f4d9ce]"
+              className="flex h-[46px] items-center justify-center gap-2 rounded-full bg-white text-[14.5px] font-medium text-[#15171c] no-underline hover:bg-[#f4d9ce]"
             >
               <Icon name="mail" />
               Preview this run
@@ -259,7 +259,7 @@ function Kpi({ label, value, foot, dark, footAccent, href, onClick }: {
     <>
       <div className="flex items-center justify-between">
         <span className="text-base font-medium">{label}</span>
-        <span className={`flex h-[38px] w-[38px] items-center justify-center rounded-full ${dark ? "bg-white text-ink" : "border-[1.5px] border-ink"}`}>
+        <span className={`flex h-[38px] w-[38px] items-center justify-center rounded-full ${dark ? "bg-white text-[#15171c]" : "border-[1.5px] border-ink"}`}>
           <Icon name="north_east" />
         </span>
       </div>
@@ -280,7 +280,7 @@ export function StageFilter({ stages, value, onChange }: { stages: string[]; val
           key={s}
           onClick={() => onChange(s)}
           className={`h-8 cursor-pointer rounded-full border-[1.5px] px-[13px] text-[13px] font-medium ${
-            value === s ? "border-ink bg-ink text-white" : "border-[#e3e0d9] bg-transparent text-ink-2 hover:border-ink"
+            value === s ? "border-panel bg-panel text-white" : "border-chip bg-transparent text-ink-2 hover:border-ink"
           }`}
         >
           {s === "all" ? "All" : cap(s)}
