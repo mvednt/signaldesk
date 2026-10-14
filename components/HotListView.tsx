@@ -52,7 +52,14 @@ export default function HotListView({ items, rows, runDate, windowDays, error }:
           {it.relevance_explanation && (
             <p className="m-0 text-[14.5px] leading-[1.55] text-pretty text-ink-2">{it.relevance_explanation}</p>
           )}
-          {it.outreach_angle && <OutreachBox text={it.outreach_angle} />}
+          {it.outreach_angle && (
+            <OutreachBox
+              text={it.outreach_angle}
+              accountId={it.account_id}
+              signalEventId={it.signal_event_id}
+              initialRating={it.feedback}
+            />
+          )}
           <button
             onClick={() => openAccount(it.account_id)}
             className="flex cursor-pointer items-center gap-1 self-start border-0 bg-transparent p-0 text-sm font-medium text-ember-dark"

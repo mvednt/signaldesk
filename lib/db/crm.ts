@@ -42,3 +42,20 @@ export async function updateRelationshipNotes(accountId: string, notes: string):
     [accountId, value]
   );
 }
+
+export type Rating = "good" | "bad" | "improve";
+
+/** Record Arjun's rating of an AI-drafted angle (one current rating per signal).
+ *  Human-owned input — written as crm_writer, never the automation role. */
+export async function upsertOutreachFeedback(
+  accountId: string,
+  signalEventId: string,
+  rating: Rating
+): Promise<void> {
+  await pool().query(
+    `insert into outreach_feedback (account_id, signal_event_id, rating, created_by)
+     values ($1, $2, $3, 'arjun')
+     on conflict (signal_event_id) do update set rating = excluded.rating`,
+    [accountId, signalEventId, rating]
+  );
+}

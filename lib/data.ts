@@ -28,6 +28,8 @@ export interface DashboardRow {
   source_component: number | null;
   match_component: number | null;
   computed_at: string | null;
+  top_signal_event_id: string | null;
+  top_feedback: string | null;
   top_title: string | null;
   top_url: string | null;
   top_published_at: string | null;

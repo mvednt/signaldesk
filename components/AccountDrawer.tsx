@@ -93,7 +93,14 @@ export default function AccountDrawer({ row: r, onClose }: { row: DashboardRow; 
                 {r.top_title}
               </a>
               {r.top_relevance && <p className="m-0 text-[14.5px] leading-[1.55] text-pretty text-ink-2">{r.top_relevance}</p>}
-              {r.top_outreach_angle && <OutreachBox text={r.top_outreach_angle} />}
+              {r.top_outreach_angle && (
+                <OutreachBox
+                  text={r.top_outreach_angle}
+                  accountId={r.account_id}
+                  signalEventId={r.top_signal_event_id}
+                  initialRating={r.top_feedback}
+                />
+              )}
 
               <div className="flex flex-col gap-2.5 pt-1">
                 <div className="text-[11px] font-medium tracking-[0.08em] text-faint">WHY THIS SCORE</div>
