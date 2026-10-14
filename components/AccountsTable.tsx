@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import type { DashboardRow } from "@/lib/data";
 import { useShell } from "./Shell";
 import { StageFilter } from "./Dashboard";
-import { Avatar, ErrorBanner, PageHeader, StageChip, fmtDate, glassStyle, matchesQuery, stagesOf } from "./ui";
+import { Avatar, ErrorBanner, Icon, PageHeader, StageChip, fmtDate, glassStyle, matchesQuery, stagesOf } from "./ui";
 
 const COLS = "grid-cols-[minmax(180px,1.2fr)_100px_minmax(220px,2fr)_110px_minmax(160px,1.2fr)_80px]";
 
@@ -59,7 +59,14 @@ export default function AccountsTable({ rows, error }: { rows: DashboardRow[]; e
               <span className="flex min-w-0 items-center gap-2.5">
                 <Avatar name={r.name} size={36} />
                 <span className="flex min-w-0 flex-col">
-                  <span className="text-[14.5px] font-medium">{r.name}</span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="text-[14.5px] font-medium">{r.name}</span>
+                    {r.escalated_at && (
+                      <span title="Auto-escalated via n8n" className="flex items-center rounded-full bg-ember-soft px-1.5 py-[3px] text-ember-ink">
+                        <Icon name="bolt" size={12} />
+                      </span>
+                    )}
+                  </span>
                   <span className="text-[12.5px] text-muted">{[r.industry, r.hq_city].filter(Boolean).join(" · ")}</span>
                 </span>
               </span>

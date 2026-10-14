@@ -77,6 +77,13 @@ export default function AccountDrawer({ row: r, onClose }: { row: DashboardRow; 
             </span>
           </div>
 
+          {r.escalated_at && (
+            <div className="flex items-center gap-2 rounded-xl bg-ember-soft px-3.5 py-2.5 text-[12.5px] font-medium text-ember-ink">
+              <Icon name="bolt" size={17} />
+              Auto-escalated · Arjun alerted via n8n to reach out now
+            </div>
+          )}
+
           {r.top_title ? (
             <>
               <div className="flex flex-wrap items-center gap-2 text-[12.5px] text-muted">

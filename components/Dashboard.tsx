@@ -170,6 +170,11 @@ export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; 
                   <span className="flex flex-wrap items-center gap-2">
                     <span className="text-[15.5px] font-medium">{r.name}</span>
                     <StageChip stage={r.relationship_stage} />
+                    {r.escalated_at && (
+                      <span title="Auto-escalated via n8n" className="flex items-center gap-0.5 rounded-full bg-ember-soft px-2 py-0.5 text-[10.5px] font-semibold text-ember-ink">
+                        <Icon name="bolt" size={12} /> Escalated
+                      </span>
+                    )}
                   </span>
                   <span className={`truncate text-[13px] ${r.top_title ? "text-ink-2" : "text-faint"}`}>
                     {r.top_title ?? "No fresh qualifying signals this cycle."}

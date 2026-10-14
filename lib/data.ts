@@ -46,6 +46,7 @@ export interface DashboardRow {
   company_phone: string | null;
   company_hq: string | null;
   company_headcount: number | null;
+  escalated_at: string | null;
 }
 
 export async function getDashboard(): Promise<DashboardRow[]> {

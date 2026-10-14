@@ -157,6 +157,30 @@ export async function finalizeNotificationRun(
   );
 }
 
+/** Claim an escalation for a triggering signal. Returns inserted=true only the
+ *  first time, so the webhook fires once per top signal. */
+export async function claimEscalation(
+  accountId: string,
+  signalEventId: string,
+  score: number
+): Promise<{ inserted: boolean }> {
+  const ins = await pool().query(
+    `insert into account_escalations (account_id, signal_event_id, score, status)
+     values ($1,$2,$3,'sent')
+     on conflict (signal_event_id) do nothing
+     returning id`,
+    [accountId, signalEventId, score]
+  );
+  return { inserted: ins.rows.length > 0 };
+}
+
+export async function finalizeEscalation(signalEventId: string, status: "sent" | "failed", response: string): Promise<void> {
+  await pool().query(
+    `update account_escalations set status=$2, webhook_response=$3 where signal_event_id=$1`,
+    [signalEventId, status, response.slice(0, 1000)]
+  );
+}
+
 export async function endPool(): Promise<void> {
   if (_pool) { await _pool.end(); _pool = null; }
 }
