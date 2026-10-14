@@ -174,10 +174,17 @@ export async function claimEscalation(
   return { inserted: ins.rows.length > 0 };
 }
 
-export async function finalizeEscalation(signalEventId: string, status: "sent" | "failed", response: string): Promise<void> {
+export async function finalizeEscalation(
+  signalEventId: string,
+  status: "sent" | "failed",
+  response: string,
+  draft?: { subject: string; body: string }
+): Promise<void> {
   await pool().query(
-    `update account_escalations set status=$2, webhook_response=$3 where signal_event_id=$1`,
-    [signalEventId, status, response.slice(0, 1000)]
+    `update account_escalations
+       set status=$2, webhook_response=$3, draft_subject=$4, draft_body=$5
+     where signal_event_id=$1`,
+    [signalEventId, status, response.slice(0, 1000), draft?.subject ?? null, draft?.body ?? null]
   );
 }
 

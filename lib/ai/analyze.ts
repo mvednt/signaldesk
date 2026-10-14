@@ -6,8 +6,9 @@ import { z } from "zod";
 import type { Account, Analysis, NormalizedSignal } from "@/lib/types";
 import { callGeminiJSON, type GeminiJsonSchema } from "@/lib/ai/gemini";
 import { createReadClient } from "@/lib/supabase/read";
+import { getCompanyVoice, voiceBlock, type CompanyVoice } from "@/lib/voice";
 
-export const PROMPT_VERSION = "analyze-v2";
+export const PROMPT_VERSION = "analyze-v3";
 
 export interface FeedbackExamples {
   good: string[];
@@ -67,7 +68,7 @@ const AnalysisZ = z.object({
   contact_title: z.string(),
 });
 
-function buildPrompt(account: Account, s: NormalizedSignal, examples: FeedbackExamples): string {
+function buildPrompt(account: Account, s: NormalizedSignal, examples: FeedbackExamples, voice: CompanyVoice): string {
   const learning: string[] = [];
   if (examples.good.length || examples.avoid.length) {
     learning.push("", "ARJUN'S FEEDBACK ON PAST ANGLES — write outreach_angle in the style he preferred:");
@@ -77,6 +78,8 @@ function buildPrompt(account: Account, s: NormalizedSignal, examples: FeedbackEx
   return [
     "You analyse news for a B2B seller of WORKFORCE-MANAGEMENT SaaS (shift scheduling,",
     "attendance, frontline/field/warehouse workforce operations, compliance).",
+    "",
+    voiceBlock(voice),
     "",
     "Decide whether the news item is a timing TRIGGER that makes this product relevant now.",
     "Relevant triggers include: headcount/geographic expansion, new CHRO/VP Operations/Chief",
@@ -115,7 +118,7 @@ export async function improveAngle(input: {
   snippet?: string | null;
   currentAngle: string;
 }): Promise<string> {
-  const examples = await getFeedbackExamples();
+  const [examples, voice] = await Promise.all([getFeedbackExamples(), getCompanyVoice()]);
   const learning: string[] = [];
   if (examples.good.length || examples.avoid.length) {
     learning.push("Arjun's taste — lean toward the GOOD examples:");
@@ -125,6 +128,8 @@ export async function improveAngle(input: {
   const prompt = [
     "You write outreach angles for a seller of WORKFORCE-MANAGEMENT SaaS (shift",
     "scheduling, attendance, frontline/field/warehouse operations, compliance).",
+    "",
+    voiceBlock(voice),
     "",
     "Rewrite the DRAFT below into a SHARPER, more specific one-sentence angle that",
     "ties the trigger to the product. Make it meaningfully different from the draft.",
@@ -140,9 +145,49 @@ export async function improveAngle(input: {
   return ImproveZ.parse(raw).outreach_angle.trim();
 }
 
+const DRAFT_SCHEMA: GeminiJsonSchema = {
+  type: "OBJECT",
+  properties: { subject: { type: "STRING" }, body: { type: "STRING" } },
+  required: ["subject", "body"],
+};
+const DraftZ = z.object({ subject: z.string().min(1), body: z.string().min(1) });
+
+export interface OutreachDraft {
+  subject: string;
+  body: string;
+}
+
+/** A full, ready-to-send outreach draft in the company voice — used for the
+ *  escalation of a hot lead. Addresses the named person when there is one. */
+export async function draftOutreach(input: {
+  company: string;
+  person?: string | null;
+  personTitle?: string | null;
+  signalTitle: string;
+  angle?: string | null;
+}): Promise<OutreachDraft> {
+  const voice = await getCompanyVoice();
+  const greet = input.person ? input.person.split(" ")[0] : "there";
+  const prompt = [
+    voiceBlock(voice),
+    "",
+    "Write a short cold outreach EMAIL in this voice, from the sender above, to a prospect",
+    `at ${input.company}${input.person ? ` — specifically ${input.person}${input.personTitle ? `, ${input.personTitle}` : ""}` : ""}.`,
+    "Follow the voice Rules exactly. Open on the trigger, make one concrete value point, end",
+    "with one low-friction ask. Use ONLY the facts below; invent no specifics, no placeholders",
+    "like [name] or [company]. Return subject (<=60 chars) and body (plain text, with the",
+    `greeting "Hi ${greet}," and the sign-off).`,
+    "",
+    `Trigger: ${input.signalTitle}`,
+    input.angle ? `Angle to build on: ${input.angle}` : "",
+  ].filter(Boolean).join("\n");
+  const raw = await callGeminiJSON(prompt, DRAFT_SCHEMA);
+  return DraftZ.parse(raw);
+}
+
 export async function analyzeSignal(account: Account, s: NormalizedSignal): Promise<Analysis> {
-  const examples = await getFeedbackExamples();
-  const raw = await callGeminiJSON(buildPrompt(account, s, examples), SCHEMA);
+  const [examples, voice] = await Promise.all([getFeedbackExamples(), getCompanyVoice()]);
+  const raw = await callGeminiJSON(buildPrompt(account, s, examples, voice), SCHEMA);
   const parsed = AnalysisZ.parse(raw);
   // Clamp confidence defensively (models occasionally emit >1).
   return { ...parsed, confidence: Math.max(0, Math.min(1, parsed.confidence)) };

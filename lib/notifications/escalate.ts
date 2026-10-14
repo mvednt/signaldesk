@@ -17,6 +17,8 @@ export interface EscalationPayload {
   signal_url: string | null;
   arjun_email: string;
   dashboard_url: string;
+  draft_subject: string;
+  draft_body: string;
 }
 
 export function linkedinSearchUrl(company: string, person?: string | null): string {

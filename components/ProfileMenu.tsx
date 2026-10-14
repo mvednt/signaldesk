@@ -126,6 +126,15 @@ export default function ProfileMenu({
             {copied ? "Email copied" : "Copy email"}
           </button>
 
+          <a
+            href="/voice"
+            role="menuitem"
+            className="sd-press flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-left text-[14px] text-ink hover:bg-track"
+          >
+            <Icon name="campaign" size={20} className="text-muted" />
+            Company voice
+          </a>
+
           <button
             onClick={toggleTheme}
             role="menuitem"

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { updateRelationshipNotes, upsertOutreachFeedback, type Rating } from "@/lib/db/crm";
+import { updateRelationshipNotes, upsertOutreachFeedback, updateCompanyVoice, type Rating, type VoiceFields } from "@/lib/db/crm";
 
 export type SaveResult = { ok: true } | { ok: false; error: string };
 
@@ -18,6 +18,21 @@ export async function saveRelationshipNotes(accountId: string, notes: string): P
     revalidatePath("/");
     revalidatePath("/accounts");
     revalidatePath("/hotlist");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+/** Save the company voice persona (shapes every AI draft). */
+export async function saveCompanyVoice(v: VoiceFields): Promise<SaveResult> {
+  for (const k of ["company_name", "product", "value_prop", "tone", "sender_name"] as const) {
+    if (!v[k] || !v[k].trim()) return { ok: false, error: `${k.replace(/_/g, " ")} is required.` };
+  }
+  try {
+    await updateCompanyVoice(v);
+    revalidatePath("/");
+    revalidatePath("/voice");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : String(e) };

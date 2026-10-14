@@ -4,7 +4,7 @@ import type { Account, NormalizedSignal } from "@/lib/types";
 import { fetchAllSources } from "@/lib/ingestion/sources";
 import { normalizeAll } from "@/lib/ingestion/normalize";
 import { matchAccount, MATCH_THRESHOLD } from "@/lib/ingestion/match";
-import { analyzeSignal, PROMPT_VERSION } from "@/lib/ai/analyze";
+import { analyzeSignal, draftOutreach, PROMPT_VERSION } from "@/lib/ai/analyze";
 import { GEMINI_MODEL } from "@/lib/ai/gemini";
 import { scoreSignal, scoreAccount, type ScoredSignal } from "@/lib/scoring/score";
 import {
@@ -101,6 +101,18 @@ export async function persistAccountResults(r: ComputeResult): Promise<{ newEven
     if (inserted) {
       const topSc = r.analyzed.find((s) => s.components.topContentHash === top.topContentHash);
       const person = topSc?.analysis.contact_name?.trim() || null;
+      const signalTitle = topSc?.signal.cleanTitle ?? "";
+      // Auto-draft the outreach in the company voice (shown to Arjun, staged).
+      let draft = { subject: "", body: "" };
+      try {
+        draft = await draftOutreach({
+          company: r.account.name,
+          person,
+          personTitle: topSc?.analysis.contact_title?.trim() || null,
+          signalTitle,
+          angle: topSc?.analysis.outreach_angle ?? null,
+        });
+      } catch { /* draft is best-effort */ }
       const { ok, response } = await fireEscalation({
         account: r.account.name,
         domain: r.account.domain ?? null,
@@ -110,12 +122,14 @@ export async function persistAccountResults(r: ComputeResult): Promise<{ newEven
         person_title: topSc?.analysis.contact_title?.trim() || null,
         linkedin_search_url: linkedinSearchUrl(r.account.name, person),
         outreach_angle: topSc?.analysis.outreach_angle ?? null,
-        signal_title: topSc?.signal.cleanTitle ?? "",
+        signal_title: signalTitle,
         signal_url: topSc?.signal.url ?? null,
         arjun_email: hotlistToEmail,
         dashboard_url: DASHBOARD_URL,
+        draft_subject: draft.subject,
+        draft_body: draft.body,
       });
-      await finalizeEscalation(topEventId, ok ? "sent" : "failed", response);
+      await finalizeEscalation(topEventId, ok ? "sent" : "failed", response, draft);
     }
   }
   return { newEvents };

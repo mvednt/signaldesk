@@ -43,6 +43,31 @@ export async function updateRelationshipNotes(accountId: string, notes: string):
   );
 }
 
+export interface VoiceFields {
+  company_name: string;
+  product: string;
+  value_prop: string;
+  audience: string;
+  tone: string;
+  sender_name: string;
+  signoff: string;
+  guidelines: string;
+}
+
+/** Update the company voice persona (human-owned config, written as crm_writer). */
+export async function updateCompanyVoice(v: VoiceFields): Promise<void> {
+  await pool().query(
+    `insert into company_voice
+       (id, company_name, product, value_prop, audience, tone, sender_name, signoff, guidelines, updated_by)
+     values ('default',$1,$2,$3,$4,$5,$6,$7,$8,'arjun')
+     on conflict (id) do update set
+       company_name=excluded.company_name, product=excluded.product, value_prop=excluded.value_prop,
+       audience=excluded.audience, tone=excluded.tone, sender_name=excluded.sender_name,
+       signoff=excluded.signoff, guidelines=excluded.guidelines, updated_by='arjun'`,
+    [v.company_name, v.product, v.value_prop, v.audience, v.tone, v.sender_name, v.signoff, v.guidelines]
+  );
+}
+
 export type Rating = "good" | "bad" | "improve";
 
 /** Record Arjun's rating of an AI-drafted angle (one current rating per signal).
