@@ -99,6 +99,47 @@ function buildPrompt(account: Account, s: NormalizedSignal, examples: FeedbackEx
   ].join("\n");
 }
 
+const IMPROVE_SCHEMA: GeminiJsonSchema = {
+  type: "OBJECT",
+  properties: { outreach_angle: { type: "STRING" } },
+  required: ["outreach_angle"],
+};
+const ImproveZ = z.object({ outreach_angle: z.string().min(1) });
+
+/** Rewrite a sharper outreach angle on demand (the "Improve" button). Uses the
+ *  same facts + Arjun's feedback examples, and must return something different. */
+export async function improveAngle(input: {
+  companyName: string;
+  industry?: string | null;
+  title: string;
+  snippet?: string | null;
+  currentAngle: string;
+}): Promise<string> {
+  const examples = await getFeedbackExamples();
+  const learning: string[] = [];
+  if (examples.good.length || examples.avoid.length) {
+    learning.push("Arjun's taste — lean toward the GOOD examples:");
+    examples.good.forEach((a) => learning.push(`  GOOD: ${a}`));
+    examples.avoid.forEach((a) => learning.push(`  POOR: ${a}`));
+  }
+  const prompt = [
+    "You write outreach angles for a seller of WORKFORCE-MANAGEMENT SaaS (shift",
+    "scheduling, attendance, frontline/field/warehouse operations, compliance).",
+    "",
+    "Rewrite the DRAFT below into a SHARPER, more specific one-sentence angle that",
+    "ties the trigger to the product. Make it meaningfully different from the draft.",
+    "Use ONLY facts in the Title/Snippet; never invent specifics; no greeting or sign-off.",
+    ...learning,
+    "",
+    `Company: ${input.companyName}${input.industry ? ` (${input.industry})` : ""}`,
+    `Title: ${input.title}`,
+    `Snippet: ${input.snippet ?? "(none)"}`,
+    `Draft angle: ${input.currentAngle}`,
+  ].join("\n");
+  const raw = await callGeminiJSON(prompt, IMPROVE_SCHEMA);
+  return ImproveZ.parse(raw).outreach_angle.trim();
+}
+
 export async function analyzeSignal(account: Account, s: NormalizedSignal): Promise<Analysis> {
   const examples = await getFeedbackExamples();
   const raw = await callGeminiJSON(buildPrompt(account, s, examples), SCHEMA);
