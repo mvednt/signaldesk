@@ -215,7 +215,7 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
         </div>
       </div>
 
-      {selected && <AccountDrawer row={selected} onClose={() => setSelectedId(null)} />}
+      {selected && <AccountDrawer key={selected.account_id} row={selected} onClose={() => setSelectedId(null)} />}
     </Ctx.Provider>
   );
 }

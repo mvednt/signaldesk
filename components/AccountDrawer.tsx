@@ -1,10 +1,36 @@
 "use client";
 
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import type { DashboardRow } from "@/lib/data";
+import { saveRelationshipNotes } from "@/app/actions/crm";
 import { Avatar, CategoryChip, Icon, SOURCE_LABEL, StageChip, fmtDate } from "./ui";
 import { OutreachBox } from "./CopyButton";
 
+const MAX_NOTES = 4000;
+
 export default function AccountDrawer({ row: r, onClose }: { row: DashboardRow; onClose: () => void }) {
+  const router = useRouter();
+  const [editing, setEditing] = useState(false);
+  const [notes, setNotes] = useState<string | null>(r.relationship_notes ?? null);
+  const [draft, setDraft] = useState(r.relationship_notes ?? "");
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const saveNotes = () => {
+    startTransition(async () => {
+      const res = await saveRelationshipNotes(r.account_id, draft);
+      if (res.ok) {
+        setNotes(draft.trim() === "" ? null : draft);
+        setEditing(false);
+        setSaveError(null);
+        router.refresh();
+      } else {
+        setSaveError(res.error);
+      }
+    });
+  };
+
   const comps: [string, number | null][] = [
     ["Recency", r.recency_component],
     ["Trigger", r.trigger_component],
@@ -91,17 +117,60 @@ export default function AccountDrawer({ row: r, onClose }: { row: DashboardRow; 
         </div>
 
         <div className="flex flex-1 flex-col gap-3.5 bg-human-soft px-6 py-[22px]">
-          <span className="flex items-center gap-[7px] text-xs font-medium text-human-ink">
-            <span className="h-2 w-2 rounded-full bg-human" />
-            ARJUN&apos;S OWN · NEVER OVERWRITTEN
-          </span>
+          <div className="flex items-center justify-between gap-2">
+            <span className="flex items-center gap-[7px] text-xs font-medium text-human-ink">
+              <span className="h-2 w-2 rounded-full bg-human" />
+              ARJUN&apos;S OWN · NEVER OVERWRITTEN
+            </span>
+            {!editing && (
+              <button
+                onClick={() => { setDraft(notes ?? ""); setSaveError(null); setEditing(true); }}
+                className="sd-press flex items-center gap-1 rounded-full border-[1.5px] border-human-ink/40 px-2.5 py-1 text-[12px] font-medium text-human-ink hover:bg-human/10"
+              >
+                <Icon name="edit" size={15} /> Edit notes
+              </button>
+            )}
+          </div>
           <div className="flex gap-2">
             <StageChip stage={r.relationship_stage} />
             {r.priority_override != null && (
               <span className="rounded-full bg-human-ink px-2 py-0.5 text-xs font-medium text-white">pinned P{r.priority_override}</span>
             )}
           </div>
-          <p className="m-0 text-[14.5px] leading-[1.55] text-pretty text-ink-2">{r.relationship_notes ?? "—"}</p>
+          {editing ? (
+            <div className="flex flex-col gap-2">
+              <textarea
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                rows={4}
+                autoFocus
+                maxLength={MAX_NOTES}
+                placeholder="Add your notes on this relationship…"
+                className="w-full resize-y rounded-[14px] border-[1.5px] border-human-ink/30 bg-surface px-3.5 py-3 text-[14.5px] leading-[1.5] text-ink outline-none placeholder:text-faint focus:border-human-ink"
+              />
+              {saveError && <span className="text-[12.5px] font-medium text-ember-ink">{saveError}</span>}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={saveNotes}
+                  disabled={isPending}
+                  className="sd-press flex h-9 items-center gap-1.5 rounded-full border-0 bg-human px-4 text-[13.5px] font-medium text-white disabled:opacity-60"
+                >
+                  <Icon name={isPending ? "progress_activity" : "check"} size={16} className={isPending ? "animate-spin" : ""} />
+                  {isPending ? "Saving…" : "Save"}
+                </button>
+                <button
+                  onClick={() => { setEditing(false); setSaveError(null); }}
+                  disabled={isPending}
+                  className="sd-press h-9 cursor-pointer rounded-full border-0 bg-transparent px-3 text-[13.5px] font-medium text-muted hover:bg-human/10 disabled:opacity-60"
+                >
+                  Cancel
+                </button>
+                <span className="ml-auto font-mono text-[11.5px] text-faint tabular-nums">{draft.length}/{MAX_NOTES}</span>
+              </div>
+            </div>
+          ) : (
+            <p className="m-0 text-[14.5px] leading-[1.55] text-pretty text-ink-2">{notes ?? "—"}</p>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1 rounded-[14px] bg-surface px-3.5 py-3">
               <span className="text-xs text-muted">Last contact</span>

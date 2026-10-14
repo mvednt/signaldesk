@@ -1,0 +1,44 @@
+// Human-owned CRM writes (Arjun editing his OWN notes). Server-only.
+//
+// Performed as the restricted `crm_writer` Postgres role
+// (CRM_WRITER_DATABASE_URL) — the exact mirror of `signal_writer`:
+//   - signal_writer  can write system tables, REVOKE ALL on human tables.
+//   - crm_writer      can write human tables,  REVOKE ALL on system tables.
+// So neither side can cross the boundary even if this code is buggy. Every
+// write also uses an EXPLICIT column list (never a blind object) as
+// defense-in-depth. The automation pipeline never uses this module, so the
+// guarantee "the SYSTEM never overwrites Arjun's notes" is unchanged — this is
+// Arjun touching his own.
+import "server-only";
+import { Pool } from "pg";
+import { requireServerEnv } from "@/lib/env";
+
+let _pool: Pool | null = null;
+
+function pool(): Pool {
+  const { crmWriterUrl } = requireServerEnv();
+  if (!crmWriterUrl) {
+    throw new Error(
+      "CRM_WRITER_DATABASE_URL is not set. Create the crm_writer role in Supabase " +
+        "(migration 0005), set its password, and paste the Transaction-pooler " +
+        "connection string into .env.local (and Vercel) to enable Arjun's CRM edits."
+    );
+  }
+  _pool ??= new Pool({ connectionString: crmWriterUrl, max: 3, ssl: { rejectUnauthorized: false } });
+  return _pool;
+}
+
+/** Set ONLY Arjun's relationship_notes for one account. Upserts the row so an
+ *  account with no CRM row yet still works; every other human column is left
+ *  exactly as Arjun left it (explicit column list — no blind write). */
+export async function updateRelationshipNotes(accountId: string, notes: string): Promise<void> {
+  const value = notes.trim() === "" ? null : notes;
+  await pool().query(
+    `insert into account_crm (account_id, relationship_notes, updated_by)
+     values ($1, $2, 'arjun')
+     on conflict (account_id) do update set
+       relationship_notes = excluded.relationship_notes,
+       updated_by = 'arjun'`,
+    [accountId, value]
+  );
+}
