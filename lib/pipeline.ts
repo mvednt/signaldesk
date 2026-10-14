@@ -9,8 +9,9 @@ import { GEMINI_MODEL } from "@/lib/ai/gemini";
 import { scoreSignal, scoreAccount, type ScoredSignal } from "@/lib/scoring/score";
 import {
   insertSignalEvent, insertAnalysis, insertOutreach, upsertScore,
-  startIngestionRun, finishIngestionRun,
+  startIngestionRun, finishIngestionRun, upsertAccountContact,
 } from "@/lib/db/writer";
+import { enrichOrganization } from "@/lib/ingestion/apollo";
 
 export interface ComputeResult {
   account: Account;
@@ -77,6 +78,14 @@ export async function persistAccountResults(r: ComputeResult): Promise<{ newEven
     top ?? { score: 0, recency: 0, trigger: 0, source: 0, match: 0, topContentHash: null },
     topEventId
   );
+
+  // "Where to reach": for warm accounts (a real trigger), enrich the company
+  // via Apollo. Gated to warm accounts to spare API credits; the PERSON to
+  // reach comes from Gemini (contact_name/title on the analysis), not Apollo.
+  if (top && top.score > 0 && r.account.domain) {
+    const contact = await enrichOrganization(r.account.domain);
+    if (contact) await upsertAccountContact(r.account.id, contact);
+  }
   return { newEvents };
 }
 

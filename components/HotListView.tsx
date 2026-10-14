@@ -60,6 +60,23 @@ export default function HotListView({ items, rows, runDate, windowDays, error }:
               initialRating={it.feedback}
             />
           )}
+          {it.contact_name && (
+            <div className="flex flex-wrap items-center gap-1.5 text-[13px] text-muted">
+              <Icon name="person" size={15} />
+              <span>
+                Reach: <span className="font-medium text-ink">{it.contact_name}</span>
+                {it.contact_title ? `, ${it.contact_title}` : ""}
+              </span>
+              <a
+                href={`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${it.contact_name} ${it.name}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-0.5 font-medium text-ember-dark no-underline hover:underline"
+              >
+                on LinkedIn <Icon name="arrow_outward" size={14} />
+              </a>
+            </div>
+          )}
           <button
             onClick={() => openAccount(it.account_id)}
             className="flex cursor-pointer items-center gap-1 self-start border-0 bg-transparent p-0 text-sm font-medium text-ember-dark"

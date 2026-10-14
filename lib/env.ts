@@ -11,6 +11,7 @@ export function requireServerEnv() {
     geminiApiKey: must("GEMINI_API_KEY"),
     geminiModel: process.env.GEMINI_MODEL || "gemini-3.8-flash",
     newsApiKey: process.env.NEWS_API_KEY || "", // optional (dev enrichment)
+    apolloApiKey: process.env.APOLLO_API_KEY || "", // company enrichment (who/where to reach)
     // Restricted-role connection for all system-owned writes.
     signalWriterUrl: process.env.SIGNAL_WRITER_DATABASE_URL || "",
     // Mirror-image restricted role for Arjun's OWN CRM edits (human-owned

@@ -39,6 +39,13 @@ export interface DashboardRow {
   top_relevance: string | null;
   top_confidence: number | null;
   top_outreach_angle: string | null;
+  top_contact_name: string | null;
+  top_contact_title: string | null;
+  company_linkedin: string | null;
+  company_website: string | null;
+  company_phone: string | null;
+  company_hq: string | null;
+  company_headcount: number | null;
 }
 
 export async function getDashboard(): Promise<DashboardRow[]> {

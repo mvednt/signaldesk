@@ -66,15 +66,37 @@ export async function insertSignalEvent(
 export async function insertAnalysis(signalEventId: string, a: Analysis, model: string, promptVersion: string): Promise<void> {
   await pool().query(
     `insert into signal_analyses
-       (signal_event_id, category, factual_claim, relevance_explanation, confidence, is_relevant, model, prompt_version)
-     values ($1,$2,$3,$4,$5,$6,$7,$8)
+       (signal_event_id, category, factual_claim, relevance_explanation, confidence, is_relevant, model, prompt_version,
+        contact_name, contact_title)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
      on conflict (signal_event_id) do update set
        category = excluded.category, factual_claim = excluded.factual_claim,
        relevance_explanation = excluded.relevance_explanation, confidence = excluded.confidence,
-       is_relevant = excluded.is_relevant, model = excluded.model, prompt_version = excluded.prompt_version`,
-    [signalEventId, a.category, a.factual_claim, a.relevance_explanation, a.confidence, a.is_relevant, model, promptVersion]
+       is_relevant = excluded.is_relevant, model = excluded.model, prompt_version = excluded.prompt_version,
+       contact_name = excluded.contact_name, contact_title = excluded.contact_title`,
+    [
+      signalEventId, a.category, a.factual_claim, a.relevance_explanation, a.confidence, a.is_relevant, model, promptVersion,
+      a.contact_name?.trim() || null, a.contact_title?.trim() || null,
+    ]
   );
   await pool().query(`update signal_events set status = 'analyzed' where id = $1`, [signalEventId]);
+}
+
+/** Company enrichment ("where to reach"). System-derived — written as signal_writer. */
+export async function upsertAccountContact(
+  accountId: string,
+  c: { company_linkedin: string | null; website: string | null; phone: string | null; hq: string | null; headcount: number | null }
+): Promise<void> {
+  await pool().query(
+    `insert into account_contacts
+       (account_id, company_linkedin, website, phone, hq, headcount, source, fetched_at)
+     values ($1,$2,$3,$4,$5,$6,'apollo', now())
+     on conflict (account_id) do update set
+       company_linkedin = excluded.company_linkedin, website = excluded.website,
+       phone = excluded.phone, hq = excluded.hq, headcount = excluded.headcount,
+       source = 'apollo', fetched_at = now()`,
+    [accountId, c.company_linkedin, c.website, c.phone, c.hq, c.headcount]
+  );
 }
 
 export async function insertOutreach(

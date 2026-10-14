@@ -16,6 +16,8 @@ export interface HotListItem {
   confidence: number | null;
   outreach_angle: string | null;
   feedback: string | null;
+  contact_name: string | null;
+  contact_title: string | null;
 }
 
 export async function getHotList(days = 3): Promise<HotListItem[]> {

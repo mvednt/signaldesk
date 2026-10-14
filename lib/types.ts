@@ -47,6 +47,8 @@ export interface Analysis {
   relevance_explanation: string;
   confidence: number; // 0..1
   outreach_angle: string;
+  contact_name: string;  // person named in the article (e.g. a new CHRO), else ""
+  contact_title: string; // that person's role, else ""
 }
 
 export interface ScoreComponents {

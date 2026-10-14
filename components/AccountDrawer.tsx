@@ -6,6 +6,7 @@ import type { DashboardRow } from "@/lib/data";
 import { saveRelationshipNotes } from "@/app/actions/crm";
 import { Avatar, CategoryChip, Icon, SOURCE_LABEL, StageChip, fmtDate } from "./ui";
 import { OutreachBox } from "./CopyButton";
+import { ReachBox } from "./ReachBox";
 
 const MAX_NOTES = 4000;
 
@@ -101,6 +102,16 @@ export default function AccountDrawer({ row: r, onClose }: { row: DashboardRow; 
                   initialRating={r.top_feedback}
                 />
               )}
+              <ReachBox
+                companyName={r.name}
+                contactName={r.top_contact_name}
+                contactTitle={r.top_contact_title}
+                companyLinkedin={r.company_linkedin}
+                companyWebsite={r.company_website}
+                companyPhone={r.company_phone}
+                companyHq={r.company_hq}
+                companyHeadcount={r.company_headcount}
+              />
 
               <div className="flex flex-col gap-2.5 pt-1">
                 <div className="text-[11px] font-medium tracking-[0.08em] text-faint">WHY THIS SCORE</div>
