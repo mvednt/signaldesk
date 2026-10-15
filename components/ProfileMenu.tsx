@@ -15,12 +15,14 @@ function currentTheme(): Theme {
 export default function ProfileMenu({
   name,
   email,
+  picture,
   role,
   accounts,
   onLogout,
 }: {
   name: string;
   email: string;
+  picture?: string;
   role: string;
   accounts: number;
   onLogout: () => void;
@@ -63,7 +65,7 @@ export default function ProfileMenu({
     } catch {}
   }
 
-  const initial = name.trim().charAt(0).toUpperCase() || "A";
+  const initial = name.trim().charAt(0).toUpperCase() || email.charAt(0).toUpperCase() || "U";
 
   return (
     <div ref={ref} className="relative">
@@ -74,9 +76,14 @@ export default function ProfileMenu({
         aria-label="Account menu"
         className="sd-press flex items-center gap-3 rounded-full py-0.5 pl-1 pr-2 hover:bg-track"
       >
-        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-human-soft text-base font-semibold text-human-ink">
-          {initial}
-        </span>
+        {picture ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={picture} alt="" referrerPolicy="no-referrer" className="h-12 w-12 rounded-full object-cover" />
+        ) : (
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-human-soft text-base font-semibold text-human-ink">
+            {initial}
+          </span>
+        )}
         <span className="hidden flex-col gap-0.5 text-left sm:flex">
           <span className="text-[15px] font-semibold text-ink">{name}</span>
           <span className="text-[13px] text-muted">{role} · {accounts} accounts</span>
@@ -95,9 +102,14 @@ export default function ProfileMenu({
           }}
         >
           <div className="flex items-center gap-3 rounded-xl px-2.5 py-3">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-human-soft text-lg font-semibold text-human-ink">
-              {initial}
-            </span>
+            {picture ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={picture} alt="" referrerPolicy="no-referrer" className="h-12 w-12 shrink-0 rounded-full object-cover" />
+            ) : (
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-human-soft text-lg font-semibold text-human-ink">
+                {initial}
+              </span>
+            )}
             <div className="flex min-w-0 flex-col">
               <span className="truncate text-[15px] font-semibold text-ink">{name}</span>
               <span className="truncate text-[12.5px] text-muted">{email}</span>
