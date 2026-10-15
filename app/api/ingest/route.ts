@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMonitoredAccounts } from "@/lib/data";
 import { computeAccountSignals, runIngestion } from "@/lib/pipeline";
+import { getScoringConfig } from "@/lib/scoring/config";
 import { requireServerEnv } from "@/lib/env";
 
 export const runtime = "nodejs";
@@ -17,9 +18,10 @@ export async function GET(req: NextRequest) {
   const accounts = (await getMonitoredAccounts(name)).slice(0, name ? 1 : 3);
   if (accounts.length === 0) return NextResponse.json({ error: "no matching accounts" }, { status: 404 });
 
+  const cfg = await getScoringConfig();
   const results = [];
   for (const a of accounts) {
-    const c = await computeAccountSignals(a);
+    const c = await computeAccountSignals(a, cfg);
     results.push({
       account: c.account.name,
       rawCount: c.rawCount,

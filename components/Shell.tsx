@@ -74,6 +74,7 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
     { href: "/", label: "Overview", icon: "space_dashboard" },
     { href: "/hotlist", label: "Hot List", icon: "local_fire_department", badge: String(hotCount), hot: true },
     { href: "/accounts", label: "Accounts", icon: "apartment", badge: String(rows.length) },
+    { href: "/settings", label: "Tuning", icon: "tune" },
   ];
   const selected = rows.find((r) => r.account_id === selectedId) ?? null;
   const q = query.trim();

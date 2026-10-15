@@ -205,6 +205,11 @@ An account's score = its **strongest** qualifying signal.
   score tables vs his human tables).
 - **Two time windows:** the dashboard **score** uses the 30-day decay (standing momentum); the
   **Hot List** uses a strict **3-day** window. Defensible: different jobs, different horizons.
+- **Calibratable (the brief asks for this):** the whole rubric — category weights, source weights,
+  decay days, match threshold, escalate threshold, send tier — lives in a `scoring_config` table and
+  is editable on the **`/settings` (Tuning)** page. Saving writes the config as `crm_writer`, then a
+  **recompute** re-scores every account from its stored signals as `signal_writer`, so the dashboard
+  re-ranks instantly without a re-scan. *Proof move: change a weight live and watch the bar chart reorder.*
 
 ---
 

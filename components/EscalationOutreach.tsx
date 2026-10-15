@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Icon } from "./ui";
 import CopyButton from "./CopyButton";
 import { sendOutreach } from "@/app/actions/outreach";
 
-const SEND_TIER = Number(process.env.NEXT_PUBLIC_SEND_TIER) || 70;
+const DEFAULT_SEND_TIER = Number(process.env.NEXT_PUBLIC_SEND_TIER) || 70;
 
 /** The auto-drafted outreach (company voice) for an escalated account. For the
  *  hottest leads (score >= SEND_TIER) it adds a human-triggered one-click send
@@ -19,7 +19,14 @@ export default function EscalationOutreach({
   body: string;
   score: number;
 }) {
-  const canSend = score >= SEND_TIER;
+  const [sendTier, setSendTier] = useState(DEFAULT_SEND_TIER);
+  useEffect(() => {
+    fetch("/api/config", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: { send_tier?: number }) => { if (typeof d.send_tier === "number") setSendTier(d.send_tier); })
+      .catch(() => {});
+  }, []);
+  const canSend = score >= sendTier;
   const [to, setTo] = useState("");
   const [draft, setDraft] = useState(body);
   const [status, setStatus] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
@@ -82,7 +89,7 @@ export default function EscalationOutreach({
           )}
         </div>
       ) : (
-        <span className="text-[11.5px] text-muted">Staged for you. One-click send unlocks at score {SEND_TIER}+.</span>
+        <span className="text-[11.5px] text-muted">Staged for you. One-click send unlocks at score {sendTier}+.</span>
       )}
     </div>
   );

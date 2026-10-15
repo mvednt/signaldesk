@@ -63,20 +63,23 @@ export async function insertSignalEvent(
   return { id: existing.rows[0].id, inserted: false };
 }
 
-export async function insertAnalysis(signalEventId: string, a: Analysis, model: string, promptVersion: string): Promise<void> {
+export async function insertAnalysis(
+  signalEventId: string, a: Analysis, model: string, promptVersion: string, matchConfidence: number
+): Promise<void> {
   await pool().query(
     `insert into signal_analyses
        (signal_event_id, category, factual_claim, relevance_explanation, confidence, is_relevant, model, prompt_version,
-        contact_name, contact_title)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+        contact_name, contact_title, match_confidence)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
      on conflict (signal_event_id) do update set
        category = excluded.category, factual_claim = excluded.factual_claim,
        relevance_explanation = excluded.relevance_explanation, confidence = excluded.confidence,
        is_relevant = excluded.is_relevant, model = excluded.model, prompt_version = excluded.prompt_version,
-       contact_name = excluded.contact_name, contact_title = excluded.contact_title`,
+       contact_name = excluded.contact_name, contact_title = excluded.contact_title,
+       match_confidence = excluded.match_confidence`,
     [
       signalEventId, a.category, a.factual_claim, a.relevance_explanation, a.confidence, a.is_relevant, model, promptVersion,
-      a.contact_name?.trim() || null, a.contact_title?.trim() || null,
+      a.contact_name?.trim() || null, a.contact_title?.trim() || null, matchConfidence,
     ]
   );
   await pool().query(`update signal_events set status = 'analyzed' where id = $1`, [signalEventId]);

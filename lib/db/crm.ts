@@ -68,6 +68,31 @@ export async function updateCompanyVoice(v: VoiceFields): Promise<void> {
   );
 }
 
+/** Update the scoring rubric (human-owned config, written as crm_writer). Weights
+ *  are stored as jsonb; thresholds as numbers. The recompute runs separately. */
+export async function updateScoringConfig(c: {
+  category_weights: Record<string, number>;
+  source_weights: Record<string, number>;
+  decay_days: number;
+  match_threshold: number;
+  escalate_threshold: number;
+  send_tier: number;
+}): Promise<void> {
+  await pool().query(
+    `insert into scoring_config
+       (id, category_weights, source_weights, decay_days, match_threshold, escalate_threshold, send_tier, updated_by)
+     values ('default', $1::jsonb, $2::jsonb, $3, $4, $5, $6, 'arjun')
+     on conflict (id) do update set
+       category_weights = excluded.category_weights, source_weights = excluded.source_weights,
+       decay_days = excluded.decay_days, match_threshold = excluded.match_threshold,
+       escalate_threshold = excluded.escalate_threshold, send_tier = excluded.send_tier, updated_by = 'arjun'`,
+    [
+      JSON.stringify(c.category_weights), JSON.stringify(c.source_weights),
+      c.decay_days, c.match_threshold, c.escalate_threshold, c.send_tier,
+    ]
+  );
+}
+
 export type Rating = "good" | "bad" | "improve";
 
 /** Record Arjun's rating of an AI-drafted angle (one current rating per signal).

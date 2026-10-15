@@ -3,10 +3,11 @@
 import type { Account, NormalizedSignal } from "@/lib/types";
 import { fetchAllSources } from "@/lib/ingestion/sources";
 import { normalizeAll } from "@/lib/ingestion/normalize";
-import { matchAccount, MATCH_THRESHOLD } from "@/lib/ingestion/match";
+import { matchAccount } from "@/lib/ingestion/match";
 import { analyzeSignal, draftOutreach, PROMPT_VERSION } from "@/lib/ai/analyze";
 import { GEMINI_MODEL } from "@/lib/ai/gemini";
 import { scoreSignal, scoreAccount, type ScoredSignal } from "@/lib/scoring/score";
+import { getScoringConfig, type ScoringConfig } from "@/lib/scoring/config";
 import {
   insertSignalEvent, insertAnalysis, insertOutreach, upsertScore,
   startIngestionRun, finishIngestionRun, upsertAccountContact,
@@ -29,13 +30,13 @@ export interface ComputeResult {
 
 const MAX_ANALYZE = 6; // bound Gemini calls per account per run
 
-export async function computeAccountSignals(account: Account): Promise<ComputeResult> {
+export async function computeAccountSignals(account: Account, cfg: ScoringConfig): Promise<ComputeResult> {
   const raws = await fetchAllSources(account);
   const normalized = normalizeAll(raws);
 
   const matched = normalized
     .map((s) => ({ s, m: matchAccount(account, s) }))
-    .filter(({ m }) => m.confidence >= MATCH_THRESHOLD);
+    .filter(({ m }) => m.confidence >= cfg.match_threshold);
 
   // Analyze the most-recent matched items (no hard age cutoff — the scoring's
   // recency decay handles age so quiet/old accounts fall in rank naturally).
@@ -46,7 +47,7 @@ export async function computeAccountSignals(account: Account): Promise<ComputeRe
   const analyzed: ScoredSignal[] = [];
   for (const { s, m } of recent) {
     const analysis = await analyzeSignal(account, s);
-    const components = scoreSignal(s, analysis, m.confidence);
+    const components = scoreSignal(s, analysis, m.confidence, cfg);
     analyzed.push({ signal: s, analysis, matchConfidence: m.confidence, components });
   }
 
@@ -61,7 +62,7 @@ export async function computeAccountSignals(account: Account): Promise<ComputeRe
   };
 }
 
-export async function persistAccountResults(r: ComputeResult): Promise<{ newEvents: number }> {
+export async function persistAccountResults(r: ComputeResult, cfg: ScoringConfig): Promise<{ newEvents: number }> {
   const model = GEMINI_MODEL();
   const hashToEventId = new Map<string, string>();
   let newEvents = 0;
@@ -70,7 +71,7 @@ export async function persistAccountResults(r: ComputeResult): Promise<{ newEven
     const { id, inserted } = await insertSignalEvent(r.account.id, sc.signal);
     hashToEventId.set(sc.signal.contentHash, id);
     if (inserted) newEvents++;
-    await insertAnalysis(id, sc.analysis, model, PROMPT_VERSION);
+    await insertAnalysis(id, sc.analysis, model, PROMPT_VERSION, sc.matchConfidence);
     if (sc.analysis.is_relevant && sc.analysis.outreach_angle.trim()) {
       await insertOutreach(r.account.id, id, sc.analysis.outreach_angle, model, PROMPT_VERSION);
     }
@@ -95,7 +96,8 @@ export async function persistAccountResults(r: ComputeResult): Promise<{ newEven
   // Auto-escalation: a very hot lead (score >= threshold) fires the n8n webhook
   // ONCE per triggering signal (claimEscalation is idempotent). No human
   // confirmation. The prospect outreach stays staged — n8n emails Arjun only.
-  const { escalateThreshold, hotlistToEmail } = requireServerEnv();
+  const { hotlistToEmail } = requireServerEnv();
+  const escalateThreshold = cfg.escalate_threshold;
   if (top && topEventId && top.score >= escalateThreshold) {
     const { inserted } = await claimEscalation(r.account.id, topEventId, top.score);
     if (inserted) {
@@ -136,6 +138,7 @@ export async function persistAccountResults(r: ComputeResult): Promise<{ newEven
 }
 
 export async function runIngestion(accounts: Account[], trigger: "manual" | "cron") {
+  const cfg = await getScoringConfig();
   const runId = await startIngestionRun(trigger);
   const errors: Array<{ account: string; error: string }> = [];
   let signalsFound = 0, signalsNew = 0, scanned = 0;
@@ -143,9 +146,9 @@ export async function runIngestion(accounts: Account[], trigger: "manual" | "cro
   for (const account of accounts) {
     scanned++;
     try {
-      const computed = await computeAccountSignals(account);
+      const computed = await computeAccountSignals(account, cfg);
       signalsFound += computed.normalizedCount;
-      const { newEvents } = await persistAccountResults(computed);
+      const { newEvents } = await persistAccountResults(computed, cfg);
       signalsNew += newEvents;
     } catch (e) {
       errors.push({ account: account.name, error: e instanceof Error ? e.message : String(e) });
