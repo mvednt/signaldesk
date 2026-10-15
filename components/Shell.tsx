@@ -11,7 +11,8 @@ import LoginScreen from "./LoginScreen";
 import ProfileMenu from "./ProfileMenu";
 import ThemeToggle from "./ThemeToggle";
 
-const ARJUN = { name: "Arjun", email: "arjun@signaldesk.app", role: "Account Executive" };
+type AuthUser = { name: string; email: string; picture?: string };
+const DEFAULT_ROLE = "Account Executive";
 
 type ShellCtx = { query: string; setQuery: (q: string) => void; openAccount: (id: string) => void; selectedId: string | null };
 const Ctx = createContext<ShellCtx>({ query: "", setQuery: () => {}, openAccount: () => {}, selectedId: null });
@@ -24,24 +25,20 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
   const searchRef = useRef<HTMLInputElement>(null);
   const openAccount = useCallback((id: string) => setSelectedId(id), []);
 
-  // Demo sign-in gate. `null` until mounted so SSR and first client paint match.
-  const [authed, setAuthed] = useState<boolean | null>(null);
+  // Google sign-in gate. `undefined` until the session check returns so SSR and
+  // first client paint match. The real session lives in an HttpOnly cookie; we
+  // ask the server who (if anyone) is signed in.
+  const [user, setUser] = useState<AuthUser | null | undefined>(undefined);
   useEffect(() => {
-    try {
-      setAuthed(sessionStorage.getItem("sd-auth") === "1");
-    } catch {
-      setAuthed(false);
-    }
-  }, []);
-  const login = useCallback(() => {
-    try { sessionStorage.setItem("sd-auth", "1"); } catch {}
-    setAuthed(true);
+    let alive = true;
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: { user: AuthUser | null }) => { if (alive) setUser(d.user ?? null); })
+      .catch(() => { if (alive) setUser(null); });
+    return () => { alive = false; };
   }, []);
   const logout = useCallback(() => {
-    try { sessionStorage.removeItem("sd-auth"); } catch {}
-    setSelectedId(null);
-    setQuery("");
-    setAuthed(false);
+    window.location.href = "/api/auth/logout";
   }, []);
 
   useEffect(() => {
@@ -56,7 +53,7 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  if (authed === null) {
+  if (user === undefined) {
     return (
       <div className="flex min-h-screen items-center justify-center text-ink">
         <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[12px] bg-ember shadow-[0_8px_22px_-8px_rgba(226,85,43,.8)] [animation:sd-pulse_1.4s_ease-in-out_infinite]">
@@ -69,7 +66,7 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
       </div>
     );
   }
-  if (!authed) return <LoginScreen onSuccess={login} />;
+  if (!user) return <LoginScreen />;
 
   const nav = [
     { href: "/", label: "Overview", icon: "space_dashboard" },
@@ -202,9 +199,10 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
             </Link>
             <div className="pl-1">
               <ProfileMenu
-                name={ARJUN.name}
-                email={ARJUN.email}
-                role={ARJUN.role}
+                name={user.name}
+                email={user.email}
+                picture={user.picture}
+                role={DEFAULT_ROLE}
                 accounts={rows.length}
                 onLogout={logout}
               />
