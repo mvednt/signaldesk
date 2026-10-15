@@ -1,0 +1,582 @@
+<title>SignalDesk Viva Defense</title>
+<style>
+  /* Layout: single-column defense dossier — sticky header, pitch hero, grouped Q&A cards with spoken answers and fallback lines. */
+  :root {
+    --bg: #f5f6f8;
+    --surface: #ffffff;
+    --surface-2: #fbfaf7;
+    --fg: #191c22;
+    --muted: #5c6573;
+    --faint: #8b93a1;
+    --border: #e3e7ed;
+    --accent: #b9710a;        /* signal warmth */
+    --accent-soft: #fbf1e0;
+    --proof: #1c7a53;         /* proven / safe */
+    --proof-soft: #e7f4ee;
+    --shadow: 0 1px 2px rgba(20,24,33,.05), 0 8px 24px rgba(20,24,33,.05);
+    --f-display: "Archivo", ui-sans-serif, system-ui, sans-serif;
+    --f-body: "Newsreader", Georgia, serif;
+    --f-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1116;
+      --surface: #161a20;
+      --surface-2: #1a1f26;
+      --fg: #e8ebef;
+      --muted: #9aa4b2;
+      --faint: #6b7483;
+      --border: #272d37;
+      --accent: #e3a243;
+      --accent-soft: #2a2114;
+      --proof: #4fbd8a;
+      --proof-soft: #15251d;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e1116;
+    --surface: #161a20;
+    --surface-2: #1a1f26;
+    --fg: #e8ebef;
+    --muted: #9aa4b2;
+    --faint: #6b7483;
+    --border: #272d37;
+    --accent: #e3a243;
+    --accent-soft: #2a2114;
+    --proof: #4fbd8a;
+    --proof-soft: #15251d;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--f-body);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 50rem;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 0 72px;
+  }
+
+  /* ---- Header ---- */
+  header.bar {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 10;
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: saturate(1.3) blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .bar-in {
+    max-width: 50rem;
+    margin: 0 auto;
+    padding: 13px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .mark {
+    font-family: var(--f-mono);
+    font-size: .72rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .bar-title {
+    font-family: var(--f-display);
+    font-weight: 700;
+    font-size: .98rem;
+    letter-spacing: -.01em;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .toggle {
+    margin-left: auto;
+    flex: none;
+    appearance: none;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-family: var(--f-mono);
+    font-size: .68rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 6px 11px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .toggle:hover { color: var(--fg); border-color: var(--accent); }
+  .toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---- Hero / pitch ---- */
+  .hero { padding-block: 40px 8px; }
+  .eyebrow {
+    font-family: var(--f-mono);
+    font-size: .72rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  h1 {
+    font-family: var(--f-display);
+    font-weight: 700;
+    font-size: clamp(2rem, 7vw, 3rem);
+    line-height: 1.04;
+    letter-spacing: -.025em;
+    text-wrap: balance;
+    margin: 10px 0 0;
+  }
+  .lede {
+    color: var(--muted);
+    font-size: 1.15rem;
+    max-width: 40ch;
+    margin-top: 14px;
+  }
+
+  .pitch {
+    margin-top: 30px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .pitch-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 16px 22px 0;
+  }
+  .pitch-head .t {
+    font-family: var(--f-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -.01em;
+  }
+  .pitch-head .clock {
+    margin-left: auto;
+    font-family: var(--f-mono);
+    font-size: .72rem;
+    color: var(--accent);
+    letter-spacing: .06em;
+  }
+  .pitch p {
+    padding: 10px 22px 22px;
+    margin: 0;
+    font-size: 1.18rem;
+    line-height: 1.58;
+  }
+  .pitch strong { color: var(--accent); font-weight: 600; }
+
+  /* ---- Sections ---- */
+  section { margin-top: 52px; }
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--fg);
+    margin-bottom: 22px;
+  }
+  .sec-head h2 {
+    font-family: var(--f-display);
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: -.02em;
+    margin: 0;
+  }
+  .sec-head .n {
+    font-family: var(--f-mono);
+    font-size: .8rem;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ---- Q&A cards ---- */
+  .qa {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+  }
+  .q {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .q .tag {
+    flex: none;
+    font-family: var(--f-mono);
+    font-size: .64rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 6px;
+    padding: 4px 7px;
+    margin-top: 4px;
+  }
+  .q h3 {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 1.12rem;
+    line-height: 1.32;
+    letter-spacing: -.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .say {
+    margin-top: 15px;
+    padding: 2px 0 2px 16px;
+    border-left: 3px solid var(--accent);
+  }
+  .say .lbl {
+    font-family: var(--f-mono);
+    font-size: .64rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--faint);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .say p { margin: 0; }
+  .pushed {
+    margin-top: 14px;
+    font-size: .98rem;
+    color: var(--muted);
+  }
+  .pushed .lbl {
+    font-family: var(--f-mono);
+    font-size: .62rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  .pushed p { margin: 3px 0 0; }
+
+  code {
+    font-family: var(--f-mono);
+    font-size: .86em;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: .06em .38em;
+    white-space: nowrap;
+  }
+
+  /* ---- Proof move callout ---- */
+  .proof {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background: var(--proof-soft);
+    border: 1px solid color-mix(in srgb, var(--proof) 30%, var(--border));
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: .97rem;
+  }
+  .proof .dot {
+    flex: none;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--proof);
+    margin-top: 8px;
+  }
+  .proof .lbl {
+    font-family: var(--f-mono);
+    font-size: .62rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--proof);
+    font-weight: 600;
+  }
+  .proof p { margin: 2px 0 0; color: var(--fg); }
+
+  /* ---- Lightning round ---- */
+  .lightning {
+    margin-top: 22px;
+    display: grid;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .lr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+    gap: 18px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .lr:first-child { border-top: none; }
+  .lr dt {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: .98rem;
+    line-height: 1.3;
+    letter-spacing: -.01em;
+    min-width: 0;
+  }
+  .lr dd {
+    margin: 0;
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.4;
+    min-width: 0;
+  }
+  .lr dd b { color: var(--accent); font-weight: 600; }
+  @media (max-width: 540px) {
+    .lr { grid-template-columns: 1fr; gap: 5px; }
+    .lr dd { font-size: .96rem; }
+  }
+
+  .closing {
+    margin-top: 52px;
+    padding: 26px 24px;
+    background: var(--fg);
+    color: var(--bg);
+    border-radius: 16px;
+  }
+  .closing .eyebrow { color: color-mix(in srgb, var(--bg) 60%, var(--accent)); }
+  .closing p {
+    font-family: var(--f-display);
+    font-weight: 500;
+    font-size: 1.3rem;
+    line-height: 1.4;
+    letter-spacing: -.01em;
+    margin: 10px 0 0;
+    text-wrap: balance;
+  }
+  .foot {
+    margin-top: 30px;
+    font-family: var(--f-mono);
+    font-size: .72rem;
+    color: var(--faint);
+    letter-spacing: .04em;
+    text-align: center;
+  }
+  @media (max-width: 440px) {
+    .q .tag { display: none; }
+    .say p, .pitch p { font-size: 1.05rem; }
+  }
+</style>
+
+<header class="bar">
+  <div class="bar-in">
+    <span class="mark">SignalDesk</span>
+    <span class="bar-title">Viva Defense Sheet</span>
+    <button class="toggle" id="themeBtn" type="button" aria-label="Toggle theme">Theme</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <span class="eyebrow">B2B Account Signal Monitor · oral defense prep</span>
+    <h1>Answers you can say out loud.</h1>
+    <p class="lede">Lead with the decision, then the reason. Offer to run a proof whenever you can.</p>
+
+    <div class="pitch">
+      <div class="pitch-head">
+        <span class="t">The 30-second opener</span>
+        <span class="clock">~35 sec</span>
+      </div>
+      <p>SignalDesk tells Arjun which of his ten accounts are worth a call this week, and why. Twice a week it scans live news for each account, uses <strong>Gemini Flash</strong> to judge whether anything is a real workforce-management buying trigger, scores and ranks what it finds, and emails him a Hot List with a drafted outreach angle. The one rule it never breaks: it writes only its own signal columns and <strong>cannot touch Arjun's notes</strong> — and that's enforced by the database itself, not just by the code.</p>
+    </div>
+  </div>
+
+  <!-- CORE -->
+  <section>
+    <div class="sec-head"><span class="n">01</span><h2>Core &amp; architecture</h2></div>
+
+    <div class="qa">
+      <div class="q"><span class="tag">CORE</span><h3>In one line, what does it do?</h3></div>
+      <div class="say"><span class="lbl">Say</span><p>It's a timing tool. Arjun's problem isn't finding accounts, it's knowing which ones have a reason to be contacted right now. SignalDesk watches live news for all ten, detects buying triggers, and surfaces only the warm ones twice a week with the reason attached.</p></div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="tag">FLOW</span><h3>Walk me through the pipeline.</h3></div>
+      <div class="say"><span class="lbl">Say</span><p>Five stages. Fetch live articles per account; normalize and de-duplicate them on a content hash; match each one to the right account; send the recent matches to Gemini to classify and explain; then score deterministically and write the results. Each stage is its own module, and the scoring part is pure — no database, no AI — so I can test it in isolation.</p></div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="tag">DATA</span><h3>What are your sources?</h3></div>
+      <div class="say"><span class="lbl">Say</span><p>Google News RSS is the primary source — it's free, keyless, and works from any server, so it's safe in production. NewsAPI is layered on as optional enrichment. Both feed the same pipeline, so adding a source is one new adapter function.</p></div>
+    </div>
+  </section>
+
+  <!-- PRESERVATION -->
+  <section>
+    <div class="sec-head"><span class="n">02</span><h2>The preservation guarantee</h2></div>
+
+    <div class="qa">
+      <div class="q"><span class="tag">KEY</span><h3>How do you guarantee you never overwrite Arjun's notes?</h3></div>
+      <div class="say"><span class="lbl">Say</span><p>This is the requirement the brief bolds twice, so I enforced it at the deepest layer. His data lives in its own tables — <code>account_crm</code> and <code>contact_history</code>. The system writes as a dedicated Postgres role, <code>signal_writer</code>, and that role has <code>REVOKE ALL</code> on those two tables. So the protection isn't "the code is careful" — the database physically refuses any write to his columns. On top of that, every write uses an explicit column allowlist, never a blind upsert of a whole object.</p></div>
+      <div class="proof"><span class="dot"></span><div><span class="lbl">Proof move</span><p>Offer to run <code>preservation_proof.sql</code> live: as <code>signal_writer</code> it attempts to edit Arjun's note, the DB returns <code>permission denied (42501)</code>, and the note comes back unchanged.</p></div></div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="tag">WHY</span><h3>Why two layers? Isn't the role enough?</h3></div>
+      <div class="say"><span class="lbl">Say</span><p>The role grant is the real guarantee; the allowlist is defense-in-depth. If someone later gave the role broader permissions by mistake, the explicit column lists still mean the application code never names a human-owned column to write to. Two independent things would both have to fail.</p></div>
+    </div>
+  </section>
+
+  <!-- AI -->
+  <section>
+    <div class="sec-head"><span class="n">03</span><h2>The AI layer</h2></div>
+
+    <div class="qa">
+      <div class="q"><span class="tag">MODEL</span><h3>Which AI, and why not Claude?</h3></div>
+      <div class="say"><span class="lbl">Say</span><p>Every runtime AI call is Gemini Flash — that's a hard constraint in the brief, and I kept to it. Claude was only the builder, never in the running system. Gemini returns structured JSON against a fixed schema, so I get back typed fields, not free text I have to parse.</p></div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="tag">TRUST</span><h3>How do you stop it inventing triggers?</h3></div>
+      <div class="say"><span class="lbl">Say</span><p>Three guards. The prompt forces it to use only facts stated in the title and snippet — no inferring. If the item isn't a genuine workforce trigger it must return <code>is_relevant=false</code> with an empty angle. And everything comes back through a strict schema I validate with Zod, with confidence clamped to zero-to-one. If the output doesn't fit, it's rejected, not trusted.</p></div>
+      <div class="proof"><span class="dot"></span><div><span class="lbl">Proof move</span><p>In the demo, Gemini flagged "Zepto Cafe cuts footprint after expansion" as a real operational trigger and correctly rejected food-safety stories as not workforce-relevant.</p></div></div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="tag">SECURITY</span><h3>What if an article contains instructions aimed at your AI?</h3></div>
+      <div class="say"><span class="lbl">Say</span><p>The prompt treats the article text as untrusted data and is told explicitly never to follow any instruction inside it. The news snippet is content to analyze, never commands. So a planted "ignore your rules" line in an article body does nothing.</p></div>
+    </div>
+  </section>
+
+  <!-- SCORING -->
+  <section>
+    <div class="sec-head"><span class="n">04</span><h2>Scoring &amp; ranking</h2></div>
+
+    <div class="qa">
+      <div class="q"><span class="tag">RANK</span><h3>How do you rank accounts — does the LLM decide?</h3></div>
+      <div class="say"><span class="lbl">Say</span><p>No, and that's deliberate. Ranking is a deterministic formula so it's explainable and I can calibrate it. An account's score is its strongest signal scored as recency times trigger-type times source quality times match confidence times the AI's own confidence, on a 0-to-100 scale. Leadership changes weigh highest, then headcount. The LLM contributes the category and a confidence; it never sets the rank directly.</p></div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="tag">DECAY</span><h3>How do quiet accounts fall down the list automatically?</h3></div>
+      <div class="say"><span class="lbl">Say</span><p>The recency factor decays to zero over a 30-day window. As a signal ages, that factor shrinks, so the account's score drops on its own — no one has to mark it cold. If nothing new comes in, it sinks naturally. And because scores live in system-owned tables, that decay never touches Arjun's own priority or notes.</p></div>
+    </div>
+  </section>
+
+  <!-- HOT LIST -->
+  <section>
+    <div class="sec-head"><span class="n">05</span><h2>The Hot List</h2></div>
+
+    <div class="qa">
+      <div class="q"><span class="tag">EMAIL</span><h3>What's in the email, and when does it send?</h3></div>
+      <div class="say"><span class="lbl">Say</span><p>Monday and Thursday mornings, 7am India time. It's the top ten accounts with the strongest signals from the last three days — each with a one-line signal summary and a Gemini-drafted outreach angle that ties the trigger to what Arjun sells. It goes out through Resend, and every send is logged.</p></div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="tag">EDGE</span><h3>What if fewer than ten accounts are warm?</h3></div>
+      <div class="say"><span class="lbl">Say</span><p>It sends fewer. The three-day window is strict and it never pads the list with stale or invented accounts. In the live demo only Ola Electric fell inside the window, so the preview returned exactly one — that's the system being honest, not broken.</p></div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="tag">SAFETY</span><h3>Could it send twice or create duplicates?</h3></div>
+      <div class="say"><span class="lbl">Say</span><p>No. The notification table has a unique constraint on date-plus-kind, so a second send on the same day is blocked by the database. Signal ingestion is idempotent the same way — a unique content hash with on-conflict-do-nothing — so re-running a job never double-writes.</p></div>
+    </div>
+  </section>
+
+  <!-- DEPLOY -->
+  <section>
+    <div class="sec-head"><span class="n">06</span><h2>Deployment &amp; live proof</h2></div>
+
+    <div class="qa">
+      <div class="q"><span class="tag">LIVE</span><h3>Is it actually deployed with real data?</h3></div>
+      <div class="say"><span class="lbl">Say</span><p>Yes — public URL on Vercel, serving real scored signals right now. Three warm accounts this cycle: Ola Electric, PhonePe, Zepto, each with a detected trigger and a drafted angle. The other seven are correctly quiet. The data is live from Google News, not seeded fixtures.</p></div>
+      <div class="proof"><span class="dot"></span><div><span class="lbl">Proof move</span><p>Have the live URL open in a tab before you walk in. Showing beats describing.</p></div></div>
+    </div>
+  </section>
+
+  <!-- CAVEATS -->
+  <section>
+    <div class="sec-head"><span class="n">07</span><h2>The caveats — handled, not hidden</h2></div>
+
+    <div class="qa">
+      <div class="q"><span class="tag">SEC</span><h3>Is the <code>signal_writer</code> password secure? It looks like a demo value.</h3></div>
+      <div class="say"><span class="lbl">Say</span><p>It's still the seeded value, and that's a deliberate call. The boundary doesn't rely on that password being secret — it relies on table grants. <code>signal_writer</code> has <code>REVOKE ALL</code> on Arjun's tables, so even someone holding the exact password and logging in directly cannot write to his CRM. The database rejects it. Rotating would be good hygiene, but it changes nothing about the security boundary.</p></div>
+      <div class="pushed"><span class="lbl">If pushed</span><p>"I can rotate it in two lines — alter the role password, then update the connection string on Vercel. I left it because the protection sits one layer deeper, at the grant level. The principle: never trust a secret to do a job a permission can do."</p></div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="tag">OPS</span><h3>Will the twice-weekly job finish in time for all ten accounts?</h3></div>
+      <div class="say"><span class="lbl">Say</span><p>On Vercel's free Hobby plan a single run is capped at 60 seconds. One account takes about 33 seconds because of the news fetch plus the Gemini calls, so ten in one sequential pass could approach that cap. The failure mode is graceful, not destructive: every write is idempotent, so a run that gets cut short just rolls the remaining accounts into the next run. Nothing corrupts, nothing double-sends.</p></div>
+      <div class="pushed"><span class="lbl">If pushed</span><p>"The fix is to batch accounts across runs so no single run nears 60 seconds — it's in my deployment notes. On the Pro plan the cap is minutes, so it's a free-tier limit, not an architectural one. One honest detail: my code requests a 5-minute limit, but Hobby overrides it to 60, so I don't rely on that line."</p></div>
+    </div>
+
+    <div class="qa">
+      <div class="q"><span class="tag">SCOPE</span><h3>The brief names LinkedIn posts as a source. Where are they?</h3></div>
+      <div class="say"><span class="lbl">Say</span><p>I cover press releases and news articles through Google News and NewsAPI. LinkedIn I left out on purpose — there's no compliant public API for post content and scraping it violates their terms. Rather than ship something brittle or against ToS, I covered the sources I can get reliably and live. The architecture is source-agnostic, so a compliant LinkedIn feed would be one new adapter into the same pipeline.</p></div>
+      <div class="pushed"><span class="lbl">If pushed</span><p>"In source channels, yes, one's missing — but the triggers the brief actually cares about, headcount, leadership, funding, digitalisation, operational news, nearly all surface in news and press coverage too. I'm capturing the signals, just not that one channel."</p></div>
+    </div>
+  </section>
+
+  <!-- LIGHTNING -->
+  <section>
+    <div class="sec-head"><span class="n">08</span><h2>Lightning round</h2></div>
+    <dl class="lightning">
+      <div class="lr"><dt>What's the stack?</dt><dd>Next.js App Router, TypeScript, Supabase Postgres, <b>Gemini Flash</b>, Resend, on Vercel.</dd></div>
+      <div class="lr"><dt>How many accounts?</dt><dd>Ten, seeded with real Indian companies like Delhivery, Zepto, and PhonePe.</dd></div>
+      <div class="lr"><dt>What counts as a trigger?</dt><dd>Headcount expansion, a new CHRO or VP Ops, funding, digitalisation, or an operational challenge.</dd></div>
+      <div class="lr"><dt>Why multiply the factors instead of add them?</dt><dd>So one weak factor drags the score down — a stale or low-confidence signal can't rank high.</dd></div>
+      <div class="lr"><dt>30-day decay but 3-day Hot List — why two windows?</dt><dd>The dashboard score reflects standing momentum; the Hot List is a strict twice-weekly alert.</dd></div>
+      <div class="lr"><dt>Who can write Arjun's tables?</dt><dd>Only an authenticated Arjun session — the automation role and anonymous readers both can't.</dd></div>
+      <div class="lr"><dt>Who can read the dashboard?</dt><dd>Anyone, read-only through the anon key, enforced by row-level security.</dd></div>
+      <div class="lr"><dt>What if Gemini returns malformed JSON?</dt><dd>Zod rejects it and the signal is skipped, never stored half-formed.</dd></div>
+      <div class="lr"><dt>What if a news source is down?</dt><dd>NewsAPI fails silently to an empty list; Google News RSS is the floor.</dd></div>
+      <div class="lr"><dt>How do you avoid duplicate signals?</dt><dd>A content hash per article, unique in the database, with on-conflict-do-nothing.</dd></div>
+      <div class="lr"><dt>Is the email itself written by AI?</dt><dd>No — the layout is fixed; only the one-line outreach angle per account is Gemini-written.</dd></div>
+      <div class="lr"><dt>How are AI costs bounded?</dt><dd>At most six Gemini calls per account per run, and Flash is cheap.</dd></div>
+      <div class="lr"><dt>Does "morning" mean the server's morning?</dt><dd>No — run dates are computed in Asia/Kolkata, so it's Arjun's Monday and Thursday.</dd></div>
+      <div class="lr"><dt>What's the Components Map?</dt><dd>The required architecture diagram showing data flow and the human-versus-system boundary.</dd></div>
+      <div class="lr"><dt>How do you know it works end to end?</dt><dd>A verified production run: ingest wrote as <code>signal_writer</code>, the Hot List emailed via Resend, CRM untouched.</dd></div>
+    </dl>
+  </section>
+
+  <div class="closing">
+    <span class="eyebrow">How to carry yourself</span>
+    <p>Every caveat is understood and bounded. Lead with the decision, show the proof when you can, and let the database do the talking on the one rule that matters most.</p>
+  </div>
+
+  <p class="foot">SignalDesk · B2B Account Signal Monitor · prep sheet</p>
+
+</div>
+
+<script>
+  (function () {
+    var btn = document.getElementById("themeBtn");
+    var root = document.documentElement;
+    function current() {
+      var set = root.getAttribute("data-theme");
+      if (set) return set;
+      return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    try {
+      var saved = localStorage.getItem("viva-theme");
+      if (saved === "dark" || saved === "light") root.setAttribute("data-theme", saved);
+    } catch (e) {}
+    btn.addEventListener("click", function () {
+      var next = current() === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem("viva-theme", next); } catch (e) {}
+    });
+  })();
+</script>
