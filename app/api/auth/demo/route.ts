@@ -3,13 +3,14 @@
 // session cookie as the Google path — the rest of the app is identical.
 import { NextResponse } from "next/server";
 import { SESSION_COOKIE, createSessionToken, sessionCookieOptions } from "@/lib/auth/session";
+import { originFromRequest } from "@/lib/auth/google";
 
 export const runtime = "nodejs";
 
 const DEMO_USER = { name: "Arjun", email: "arjun@signaldesk.app" };
 
 export async function GET(req: Request) {
-  const origin = new URL(req.url).origin;
+  const origin = originFromRequest(req);
   const res = NextResponse.redirect(origin + "/");
   res.cookies.set(SESSION_COOKIE, createSessionToken(DEMO_USER), sessionCookieOptions);
   return res;

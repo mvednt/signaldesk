@@ -1,12 +1,12 @@
 // Starts the Google sign-in flow: set a CSRF `state` cookie, redirect to Google.
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
-import { buildAuthUrl, googleConfigured } from "@/lib/auth/google";
+import { buildAuthUrl, googleConfigured, originFromRequest } from "@/lib/auth/google";
 
 export const runtime = "nodejs";
 
 export async function GET(req: Request) {
-  const origin = new URL(req.url).origin;
+  const origin = originFromRequest(req);
   if (!googleConfigured()) {
     return NextResponse.redirect(`${origin}/?auth_error=not_configured`);
   }

@@ -11,6 +11,18 @@ export function googleConfigured(): boolean {
   return Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
 }
 
+/** Public origin of the request. Behind a proxy (Vercel) `new URL(req.url)`
+ *  can carry the internal host, so prefer the forwarded host/proto. The OAuth
+ *  redirect_uri must exactly match what's registered, so this must resolve to
+ *  the domain the user is actually on. */
+export function originFromRequest(req: Request): string {
+  const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
+  if (!host) return new URL(req.url).origin;
+  const local = /^(localhost|127\.|\[::1\]|0\.0\.0\.0)/.test(host);
+  const proto = req.headers.get("x-forwarded-proto") || (local ? "http" : "https");
+  return `${proto}://${host}`;
+}
+
 function clientId(): string {
   const v = process.env.GOOGLE_CLIENT_ID;
   if (!v) throw new Error("GOOGLE_CLIENT_ID is not set.");

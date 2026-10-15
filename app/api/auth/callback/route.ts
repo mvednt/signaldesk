@@ -1,14 +1,14 @@
 // Google redirects here with ?code&state. Verify state, exchange the code for
 // the user's profile, set the signed session cookie, and return to the app.
 import { NextResponse } from "next/server";
-import { exchangeCodeForUser } from "@/lib/auth/google";
+import { exchangeCodeForUser, originFromRequest } from "@/lib/auth/google";
 import { SESSION_COOKIE, createSessionToken, sessionCookieOptions } from "@/lib/auth/session";
 
 export const runtime = "nodejs";
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const origin = url.origin;
+  const origin = originFromRequest(req);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
   const expectedState = req.headers
