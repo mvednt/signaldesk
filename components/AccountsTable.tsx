@@ -10,7 +10,7 @@ import { Avatar, ErrorBanner, Icon, PageHeader, StageChip, fmtDate, glassStyle, 
 const COLS = "grid-cols-[minmax(180px,1.2fr)_100px_minmax(220px,2fr)_110px_minmax(160px,1.2fr)_80px]";
 
 export default function AccountsTable({ rows, error }: { rows: DashboardRow[]; error: string | null }) {
-  const { query, openAccount, selectedId } = useShell();
+  const { query, openAccount, selectedId, userName } = useShell();
   const [stage, setStage] = useState("all");
   const [warmOnly, setWarmOnly] = useState(useSearchParams().get("view") === "warm");
   const filtered = rows.filter(
@@ -43,7 +43,7 @@ export default function AccountsTable({ rows, error }: { rows: DashboardRow[]; e
           <div className={`grid ${COLS} gap-4 px-2 py-3.5 text-[11px] font-medium tracking-[0.08em] text-faint`}>
             <span>ACCOUNT</span>
             <span>STAGE</span>
-            <span className="text-human-ink">ARJUN&apos;S NOTES</span>
+            <span className="text-human-ink">{`${userName}'s notes`.toUpperCase()}</span>
             <span>LAST CONTACT</span>
             <span>NEXT STEP</span>
             <span className="text-right">SCORE</span>

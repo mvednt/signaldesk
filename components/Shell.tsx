@@ -14,8 +14,8 @@ import ThemeToggle from "./ThemeToggle";
 type AuthUser = { name: string; email: string; picture?: string };
 const DEFAULT_ROLE = "Account Executive";
 
-type ShellCtx = { query: string; setQuery: (q: string) => void; openAccount: (id: string) => void; selectedId: string | null };
-const Ctx = createContext<ShellCtx>({ query: "", setQuery: () => {}, openAccount: () => {}, selectedId: null });
+type ShellCtx = { query: string; setQuery: (q: string) => void; openAccount: (id: string) => void; selectedId: string | null; userName: string };
+const Ctx = createContext<ShellCtx>({ query: "", setQuery: () => {}, openAccount: () => {}, selectedId: null, userName: "You" });
 export const useShell = () => useContext(Ctx);
 
 export default function Shell({ rows, hotCount, children }: { rows: DashboardRow[]; hotCount: number; children: ReactNode }) {
@@ -68,6 +68,8 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
   }
   if (!user) return <LoginScreen />;
 
+  const firstName = user.name.split(" ")[0] || "You";
+
   const nav = [
     { href: "/", label: "Overview", icon: "space_dashboard" },
     { href: "/hotlist", label: "Hot List", icon: "local_fire_department", badge: String(hotCount), hot: true },
@@ -78,7 +80,7 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
   const results = q ? rows.filter((r) => matchesQuery(r, query)).sort((a, b) => b.score - a.score).slice(0, 8) : [];
 
   return (
-    <Ctx.Provider value={{ query, setQuery, openAccount, selectedId }}>
+    <Ctx.Provider value={{ query, setQuery, openAccount, selectedId, userName: firstName }}>
       <div className="grid min-h-screen grid-cols-1 gap-4 p-4 text-ink lg:grid-cols-[248px_minmax(0,1fr)]">
         <aside style={glassStyle} className="glass flex flex-col gap-7 rounded-3xl px-[18px] pb-[18px] pt-7 lg:sticky lg:top-4 lg:h-[calc(100vh-32px)]">
           <Link
@@ -134,7 +136,7 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
             </p>
             <div className="flex flex-col gap-1.5 text-xs text-[#d7d8db]">
               <span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-ember" />System-derived</span>
-              <span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-human" />Arjun&apos;s own</span>
+              <span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-human" />{`${firstName}'s own`}</span>
             </div>
           </div>
         </aside>

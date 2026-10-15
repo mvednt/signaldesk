@@ -9,7 +9,7 @@ import Countdown from "./Countdown";
 import { Avatar, CATEGORY_LABEL, Card, CardTitle, ErrorBanner, Icon, PageHeader, StageChip, cap, fmtDate, glassStyle, matchesQuery, stagesOf } from "./ui";
 
 export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; hot: HotListItem[]; error: string | null }) {
-  const { query, openAccount, selectedId } = useShell();
+  const { query, openAccount, selectedId, userName } = useShell();
   const [stage, setStage] = useState<string>("all");
 
   const warm = rows.filter((r) => r.score > 0);
@@ -122,7 +122,7 @@ export default function Dashboard({ rows, hot, error }: { rows: DashboardRow[]; 
         <Card className="flex-[1_1_260px] gap-3.5">
           <div className="flex items-center justify-between">
             <CardTitle>Pipeline</CardTitle>
-            <span className="text-xs font-medium text-human-ink">Arjun&apos;s stages</span>
+            <span className="text-xs font-medium text-human-ink">{`${userName}'s stages`}</span>
           </div>
           <div className="flex flex-col gap-1.5">
             {stages.map((s) => {

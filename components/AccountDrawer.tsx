@@ -8,11 +8,13 @@ import { Avatar, CategoryChip, Icon, SOURCE_LABEL, StageChip, fmtDate } from "./
 import { OutreachBox } from "./CopyButton";
 import { ReachBox } from "./ReachBox";
 import EscalationOutreach from "./EscalationOutreach";
+import { useShell } from "./Shell";
 
 const MAX_NOTES = 4000;
 
 export default function AccountDrawer({ row: r, onClose }: { row: DashboardRow; onClose: () => void }) {
   const router = useRouter();
+  const { userName } = useShell();
   const [editing, setEditing] = useState(false);
   const [notes, setNotes] = useState<string | null>(r.relationship_notes ?? null);
   const [draft, setDraft] = useState(r.relationship_notes ?? "");
@@ -81,7 +83,7 @@ export default function AccountDrawer({ row: r, onClose }: { row: DashboardRow; 
           {r.escalated_at && (
             <div className="flex items-center gap-2 rounded-xl bg-ember-soft px-3.5 py-2.5 text-[12.5px] font-medium text-ember-ink">
               <Icon name="bolt" size={17} />
-              Auto-escalated · Arjun alerted via n8n to reach out now
+              Auto-escalated · {userName} alerted via n8n to reach out now
             </div>
           )}
 
@@ -153,7 +155,7 @@ export default function AccountDrawer({ row: r, onClose }: { row: DashboardRow; 
           <div className="flex items-center justify-between gap-2">
             <span className="flex items-center gap-[7px] text-xs font-medium text-human-ink">
               <span className="h-2 w-2 rounded-full bg-human" />
-              ARJUN&apos;S OWN · NEVER OVERWRITTEN
+              {`${userName}'s own`.toUpperCase()} · NEVER OVERWRITTEN
             </span>
             {!editing && (
               <button

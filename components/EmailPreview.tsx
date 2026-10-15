@@ -19,7 +19,7 @@ export default function EmailPreview({ items, runDate, subject, to, from, error 
     <div className="flex flex-col gap-5">
       <PageHeader
         title="Email preview"
-        subtitle={<>Exactly what lands in Arjun&apos;s inbox every Mon &amp; Thu morning (Asia/Kolkata) · run date {runDate}</>}
+        subtitle={<>Exactly what lands in your inbox every Mon &amp; Thu morning (Asia/Kolkata) · run date {runDate}</>}
       >
         <a
           href="/api/hotlist?format=html"
