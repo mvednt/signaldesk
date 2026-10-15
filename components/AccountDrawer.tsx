@@ -7,6 +7,7 @@ import { saveRelationshipNotes } from "@/app/actions/crm";
 import { Avatar, CategoryChip, Icon, SOURCE_LABEL, StageChip, fmtDate } from "./ui";
 import { OutreachBox } from "./CopyButton";
 import { ReachBox } from "./ReachBox";
+import EscalationOutreach from "./EscalationOutreach";
 
 const MAX_NOTES = 4000;
 
@@ -119,6 +120,13 @@ export default function AccountDrawer({ row: r, onClose }: { row: DashboardRow; 
                 companyHq={r.company_hq}
                 companyHeadcount={r.company_headcount}
               />
+              {r.escalation_draft_subject && r.escalation_draft_body && (
+                <EscalationOutreach
+                  subject={r.escalation_draft_subject}
+                  body={r.escalation_draft_body}
+                  score={r.score}
+                />
+              )}
 
               <div className="flex flex-col gap-2.5 pt-1">
                 <div className="text-[11px] font-medium tracking-[0.08em] text-faint">WHY THIS SCORE</div>
