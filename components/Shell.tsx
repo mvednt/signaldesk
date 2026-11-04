@@ -13,6 +13,10 @@ import ThemeToggle from "./ThemeToggle";
 
 type AuthUser = { name: string; email: string; picture?: string };
 const DEFAULT_ROLE = "Account Executive";
+// Temporary open-demo mode: set NEXT_PUBLIC_OPEN_DEMO=1 to drop the login wall so
+// anyone can inspect the app (renders as a read-only "Guest"). Unset it to restore
+// the Google sign-in gate — the auth flow below is left fully intact either way.
+const OPEN_DEMO = process.env.NEXT_PUBLIC_OPEN_DEMO === "1";
 
 type ShellCtx = { query: string; setQuery: (q: string) => void; openAccount: (id: string) => void; selectedId: string | null; userName: string };
 const Ctx = createContext<ShellCtx>({ query: "", setQuery: () => {}, openAccount: () => {}, selectedId: null, userName: "You" });
@@ -66,9 +70,10 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
       </div>
     );
   }
-  if (!user) return <LoginScreen />;
+  const effectiveUser: AuthUser | null = user ?? (OPEN_DEMO ? { name: "Guest", email: "" } : null);
+  if (!effectiveUser) return <LoginScreen />;
 
-  const firstName = user.name.split(" ")[0] || "You";
+  const firstName = effectiveUser.name.split(" ")[0] || "You";
 
   const nav = [
     { href: "/", label: "Overview", icon: "space_dashboard" },
@@ -202,9 +207,9 @@ export default function Shell({ rows, hotCount, children }: { rows: DashboardRow
             </Link>
             <div className="pl-1">
               <ProfileMenu
-                name={user.name}
-                email={user.email}
-                picture={user.picture}
+                name={effectiveUser.name}
+                email={effectiveUser.email}
+                picture={effectiveUser.picture}
                 role={DEFAULT_ROLE}
                 accounts={rows.length}
                 onLogout={logout}
